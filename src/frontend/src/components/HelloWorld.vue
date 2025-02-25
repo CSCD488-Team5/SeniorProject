@@ -7,7 +7,7 @@ const router = useRouter();
 
 onMounted(async () => {
   try {
-    const response = await fetch("http://localhost:8080/api/hello");
+    const response = await fetch("/api/hello");
     msg.value = await response.text();
   } catch (error) {
     console.error("Fetch error:", error);
