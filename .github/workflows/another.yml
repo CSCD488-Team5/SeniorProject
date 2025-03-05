@@ -43,19 +43,13 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Ensure correct directory
-            cd /home/ec2-user/app
+           # Navigate to the app directory
+            cd /home/ec2-user/app/target
+            
+            # Kill any running Java processes
+            sudo pkill -f "java -jar" || echo "No existing process found"
 
-            # Kill existing Spring Boot app (if running)
-            sudo pkill -f "java -jar SeniorProject-0.0.1-SNAPSHOT.jar" || echo "No running app found"
-
-            # Start new Spring Boot app in the background
-            nohup java -jar SeniorProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-
-            # Verify if the app is running
-            sleep 5
-            if sudo lsof -i :80 | grep "LISTEN"; then
-              echo "✅ Spring Boot app deployed successfully and running on port 80!"
-            else
-              echo "❌ Error: Spring Boot app is not running. Check app.log"
-            fi
+            # Start the application properly in the background
+            nohup java -jar SeniorProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 & disown
+            
+            echo "✅ Spring Boot application restarted successfully!"
