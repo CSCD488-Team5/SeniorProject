@@ -1,0 +1,61 @@
+name: Deploy Spring Boot JAR to EC2
+
+on:
+  push:
+    branches:
+      - main  # Deploy when code is pushed to main branch
+
+jobs:
+  deploy:
+    name: Deploy JAR to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ✅ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🔍 Verify Files Exist
+        run: ls -la ${{ github.workspace }}  # Debugging step to ensure correct directory
+
+      - name: 🔧 Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 🏗️ Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: 🚀 Deploy JAR to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "target/SeniorProject-0.0.1-SNAPSHOT.jar"
+          target: "/home/ubuntu/app"
+
+      - name: 🔄 Restart Spring Boot Application on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Ensure correct directory
+            cd /home/ubuntu/app
+
+            # Kill existing Spring Boot app (if running)
+            sudo pkill -f "java -jar SeniorProject-0.0.1-SNAPSHOT.jar" || echo "No running app found"
+
+            # Start new Spring Boot app in the background
+            nohup java -jar SeniorProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+
+            # Verify if the app is running
+            sleep 5
+            if sudo lsof -i :80 | grep "LISTEN"; then
+              echo "✅ Spring Boot app deployed successfully and running on port 80!"
+            else
+              echo "❌ Error: Spring Boot app is not running. Check app.log"
+            fi
