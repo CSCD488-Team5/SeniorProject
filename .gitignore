@@ -44,3 +44,4 @@ coverage
 
 # Ignore target folder with jar files
 target/
+.DS_Store
