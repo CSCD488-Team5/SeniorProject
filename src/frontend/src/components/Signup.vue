@@ -1,11 +1,20 @@
 <template>
   <div class="container">
     <div class="top-right">
-      <router-link to="/Signup" class="signup-button">Sign Up</router-link>
+      <router-link to="/login" class="signup-button">Login</router-link>
     </div>
-    <div class="login-box">
-      <h2 class="title">Login</h2>
+    <div class="signup-box">
+      <h2 class="title">Sign Up</h2>
       <form>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input
+              type="text"
+              id="name"
+              class="input-field"
+              placeholder="Enter your name"
+          />
+        </div>
         <div class="form-group">
           <label for="email">Email</label>
           <input
@@ -24,7 +33,7 @@
               placeholder="Enter your password"
           />
         </div>
-        <button type="submit" class="login-button">Login</button>
+        <button type="submit" class="signup-button">Sign Up</button>
       </form>
     </div>
   </div>
@@ -32,7 +41,7 @@
 
 <script>
 export default {
-  name: 'LoginPage'
+  name: 'SignupPage'
 }
 </script>
 
@@ -54,20 +63,21 @@ export default {
 
 .signup-button {
   padding: 0.5rem 1rem;
-  background-color: #10b981;
+  background-color: #3b82f6;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  text-decoration: none;
   transition: background-color 0.3s;
 }
 
 .signup-button:hover {
-  background-color: #059669;
+  background-color: #2563eb;
 }
 
-.login-box {
+.signup-box {
   background: white;
   padding: 2rem;
   border-radius: 16px;
@@ -100,21 +110,4 @@ label {
   border-radius: 8px;
   font-size: 1rem;
 }
-
-.login-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.login-button:hover {
-  background-color: #2563eb;
-}
 </style>
-
