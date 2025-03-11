@@ -1,6 +1,5 @@
 package com.Team5.SeniorProject.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -11,25 +10,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Team5.SeniorProject.model.User;
+import com.Team5.SeniorProject.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/SignupController")
 @CrossOrigin(origins = "http://localhost:5173") 
 public class SignupController {
 
-	private static final List<User> users = new ArrayList<>();
+	private final UserRepository userRepository;
+
+	public SignupController(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
 	
 	@PostMapping
 	public String signup(@RequestBody User user) {
 		// Simulate saving user (later replace with a database)
-		users.add(user); 
+		userRepository.save(user);
 		return "User signed up successfully!";
 	}
 
 	@GetMapping("/users")
 	public List<User> getAllUsers() {
 		
-		return users;
+		return userRepository.findAll();
 	}
 
 	@GetMapping("/login")
