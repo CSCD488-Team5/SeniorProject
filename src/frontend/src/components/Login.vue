@@ -8,36 +8,40 @@
       <form>
         <div class="form-group">
           <label for="email">Email</label>
-          <input
-              type="email"
-              id="email"
-              class="input-field"
-              placeholder="Enter your email"
-          />
+          <input type="email" id="email" class="input-field" placeholder="Enter your email" />
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input
-              type="password"
-              id="password"
-              class="input-field"
-              placeholder="Enter your password"
-          />
+          <input type="password" id="password" class="input-field" placeholder="Enter your password" />
         </div>
         <button type="submit" class="login-button">Login</button>
       </form>
     </div>
+    
   </div>
 </template>
 
 <script>
 export default {
-  name: 'LoginPage'
+  name: 'LoginPage',
+  data() {
+    return {
+      msg: ''
+    }
+  },
+  mounted() {
+    fetch("/SignupController/login")
+      .then((response) => response.text())
+      .then((data) => {
+        this.msg = data;
+      })
+  }
 }
 </script>
 
 <style scoped>
-.container {
+.container
+{
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,13 +50,15 @@ export default {
   position: relative;
 }
 
-.top-right {
+.top-right
+{
   position: absolute;
   top: 20px;
   right: 20px;
 }
 
-.signup-button {
+.signup-button
+{
   padding: 0.5rem 1rem;
   background-color: #10b981;
   color: white;
@@ -63,11 +69,13 @@ export default {
   transition: background-color 0.3s;
 }
 
-.signup-button:hover {
+.signup-button:hover
+{
   background-color: #059669;
 }
 
-.login-box {
+.login-box
+{
   background: white;
   padding: 2rem;
   border-radius: 16px;
@@ -76,24 +84,28 @@ export default {
   width: 100%;
 }
 
-.title {
+.title
+{
   text-align: center;
   font-size: 24px;
   margin-bottom: 1.5rem;
 }
 
-.form-group {
+.form-group
+{
   margin-bottom: 1rem;
 }
 
-label {
+label
+{
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: #333;
 }
 
-.input-field {
+.input-field
+{
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ccc;
@@ -101,7 +113,8 @@ label {
   font-size: 1rem;
 }
 
-.login-button {
+.login-button
+{
   width: 100%;
   padding: 0.75rem;
   background-color: #3b82f6;
@@ -113,8 +126,8 @@ label {
   transition: background-color 0.3s;
 }
 
-.login-button:hover {
+.login-button:hover
+{
   background-color: #2563eb;
 }
 </style>
-
