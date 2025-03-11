@@ -1,6 +1,7 @@
 package com.Team5.SeniorProject.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +35,17 @@ public class SignupController {
 	public List<User> getAllUsers() {
 		
 		return userRepository.findAll();
+	}
+
+	@PostMapping("/login")
+	public String login(@RequestBody User loginUser) {
+		Optional<User> existingUser = userRepository.findByEmail(loginUser.getEmail());
+
+		if (existingUser.isPresent() && existingUser.get().getPassword().equals(loginUser.getPassword())) {
+			return "Login successful! Welcome " + existingUser.get().getName();
+		} else {
+			return "Invalid email or password!";
+		}
 	}
 
 	@GetMapping("/login")
