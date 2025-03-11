@@ -1,3 +1,31 @@
+<script setup>
+import { ref } from 'vue';
+
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const message = ref('');
+
+const signup = async () => {
+  try {
+    const response = await fetch('http://localhost/api/SignupController', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name.value, email: email.value, password: password.value })
+    });
+
+    if (!response.ok) {
+      throw new Error('Signup failed');
+    }
+
+    const data = await response.text();
+    message.value = data; // Display backend response
+  } catch (error) {
+    message.value = 'Error: ' + error.message;
+  }
+};
+</script>
+
 <template>
   <div class="container">
     <div class="top-right">
@@ -5,14 +33,16 @@
     </div>
     <div class="signup-box">
       <h2 class="title">Sign Up</h2>
-      <form>
+      <form @submit.prevent="signup">
         <div class="form-group">
           <label for="name">Name</label>
           <input
               type="text"
               id="name"
+              v-model="name"
               class="input-field"
               placeholder="Enter your name"
+              required
           />
         </div>
         <div class="form-group">
@@ -20,8 +50,10 @@
           <input
               type="email"
               id="email"
+              v-model="email"
               class="input-field"
               placeholder="Enter your email"
+              required
           />
         </div>
         <div class="form-group">
@@ -29,21 +61,18 @@
           <input
               type="password"
               id="password"
+              v-model="password"
               class="input-field"
               placeholder="Enter your password"
+              required
           />
         </div>
         <button type="submit" class="signup-button">Sign Up</button>
       </form>
+      <p v-if="message" class="message">{{ message }}</p>
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'SignupPage'
-}
-</script>
 
 <style scoped>
 .container {
@@ -109,5 +138,12 @@ label {
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
+}
+
+.message {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1rem;
+  color: green;
 }
 </style>
