@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 const name = ref('');
+const username = ref('');
 const email = ref('');
 const password = ref('');
 const message = ref('');
@@ -11,7 +12,7 @@ const signup = async () => {
     const response = await fetch('http://localhost/api/SignupController', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.value, email: email.value, password: password.value })
+      body: JSON.stringify({ name: name.value, username: username.value, email: email.value, password: password.value })
     });
 
     if (!response.ok) {
@@ -42,6 +43,17 @@ const signup = async () => {
               v-model="name"
               class="input-field"
               placeholder="Enter your name"
+              required
+          />
+        </div>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+              type="text"
+              id="username"
+              v-model="username"
+              class="input-field"
+              placeholder="Enter a username"
               required
           />
         </div>

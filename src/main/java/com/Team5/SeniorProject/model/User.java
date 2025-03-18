@@ -24,12 +24,16 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 
+	@Column(unique = true, nullable = false)
+	private String username;
+
 	public User() {}
 
-	public User(String name, String email, String password) {
+	public User(String name, String username, String email, String password) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
+		this.username = username;
 	}
 
 	// Getters and Setters
@@ -42,5 +46,6 @@ public class User {
     public void setEmail(String email) { this.email = email; }
 
     public String getPassword() { return password; }
+	public String getUsername() { return username; }
     public void setPassword(String password) { this.password = password; }
 }

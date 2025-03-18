@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 
-const email = ref('');
+const username = ref('');
 const password = ref('');
 const message = ref('');
 
@@ -10,7 +10,7 @@ const login = async () => {
     const response = await fetch('http://localhost/api/SignupController/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value })
+      body: JSON.stringify({ username: username.value, password: password.value })
     });
 
     const data = await response.text();
@@ -35,13 +35,13 @@ const login = async () => {
       <h2 class="title">Login</h2>
       <form @submit.prevent="login">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="username">Username</label>
           <input
-              type="email"
-              id="email"
-              v-model="email"
+              type="username"
+              id="username"
+              v-model="username"
               class="input-field"
-              placeholder="Enter your email"
+              placeholder="Enter your username"
               required
           />
         </div>

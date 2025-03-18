@@ -39,7 +39,7 @@ public class SignupController {
 
 	@PostMapping("/login")
 	public String login(@RequestBody User loginUser) {
-		Optional<User> existingUser = userRepository.findByEmail(loginUser.getEmail());
+		Optional<User> existingUser = userRepository.findByUsername(loginUser.getUsername());
 
 		if (existingUser.isPresent() && existingUser.get().getPassword().equals(loginUser.getPassword())) {
 			return "Login successful! Welcome " + existingUser.get().getName();
