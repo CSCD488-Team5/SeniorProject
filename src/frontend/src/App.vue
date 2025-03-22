@@ -1,6 +1,13 @@
 <template>
   <div id="app">
-    <router-view/>
+    <v-app>
+      <NavBar />
+      <v-main>
+        <router-view/>
+      </v-main>
+
+    </v-app>
+
   </div>
 </template>
 
@@ -9,3 +16,6 @@
   background-color: white;
 }
 </style>
+<script setup lang="ts">
+import NavBar from "@/components/NavBar.vue";
+</script>
