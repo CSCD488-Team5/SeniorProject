@@ -45,3 +45,4 @@ coverage
 # Ignore target folder with jar files
 target/
 .DS_Store
+src/frontend/node/npm
