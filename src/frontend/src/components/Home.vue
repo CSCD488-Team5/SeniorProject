@@ -4,8 +4,13 @@
     <v-slide-group>
       <v-slide-item v-for="event in events" :key="event.id">
         <div class="card-wrapper">
-          <EventCard :imageSrc="event.imageSrc" :title="event.title" :subtitle="event.subtitle"
-            :content="event.content" />
+          <EventCard 
+            :id="event.id"
+            :imageSrc="event.imageSrc" 
+            :title="event.title" 
+            :subtitle="event.subtitle"
+            :content="event.content" 
+          />
         </div>
       </v-slide-item>
     </v-slide-group>
