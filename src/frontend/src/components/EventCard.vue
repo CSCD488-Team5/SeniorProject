@@ -1,6 +1,6 @@
 <template>
-	<v-card class="mx-auto">
-		<v-img height="200px" :src="imageSrc" cover></v-img>
+	<v-card class="mx-auto" fixed-width-card>
+		<v-img height="200px" :src="computedImageSrc" cover></v-img>
 		<v-card-title class="title-wrap">{{ title }}</v-card-title>
 		<v-card-subtitle>{{ subtitle }}</v-card-subtitle>
 
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -33,6 +33,13 @@ const props = defineProps({
 	subtitle: { type: String, required: true },
 	content: { type: String, required: true },
 	id: Number
+})
+
+const computedImageSrc = computed(() => {
+	if (props.imageSrc && !props.imageSrc.startsWith('data:')) {
+		return `data:image/jpeg;base64,${props.imageSrc}`
+	}
+	return props.imageSrc
 })
 
 const show = ref(false)

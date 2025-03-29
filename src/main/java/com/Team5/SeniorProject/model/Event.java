@@ -28,8 +28,8 @@ public class Event {
 	private String content;
 	
 	@Lob
-	private byte[] imageData;
-	
+	private String imageBase64;
+
 	private LocalDateTime time;
 	private String location;
 }

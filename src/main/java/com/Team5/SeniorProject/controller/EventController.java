@@ -3,10 +3,12 @@ package com.Team5.SeniorProject.controller;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +23,7 @@ import com.Team5.SeniorProject.repository.EventRepository;
 
 @RestController
 @RequestMapping("/api/events")
+@CrossOrigin(origins = "http://localhost:5173")
 public class EventController {
 	
 	@Autowired
@@ -47,7 +50,7 @@ public class EventController {
             event.setContent(content);
             event.setTime(LocalDateTime.parse(time));
             event.setLocation(location);
-            event.setImageData(imageFile.getBytes());
+            event.setImageBase64(Base64.getEncoder().encodeToString(imageFile.getBytes()));
             Event savedEvent = eventRepository.save(event);
             return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
         } catch (IOException e) {
