@@ -2,8 +2,8 @@ package com.Team5.SeniorProject.controller;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Base64;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,9 +36,12 @@ public class EventController {
 	// Endpoint for creating an event with an image
     @PostMapping("/upload")
     public ResponseEntity<Event> createEventWithImage(
+            // Category
+            // Author 
             @RequestParam("title") String title,
             @RequestParam("subtitle") String subtitle,
             @RequestParam("content") String content,
+            // DateTime
             @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
             @RequestParam("location") String location,
             @RequestParam("image") MultipartFile imageFile) {

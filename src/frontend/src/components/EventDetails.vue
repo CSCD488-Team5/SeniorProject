@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container max-width="800px">
     <div v-if="eventData">
       <!-- Display the event image if available -->
       <v-img
