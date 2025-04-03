@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import axios from "axios";
 
 const name = ref('');
 const username = ref('');
@@ -9,22 +10,20 @@ const message = ref('');
 
 const signup = async () => {
   try {
-    const response = await fetch('http://localhost/api/SignupController', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.value, username: username.value, email: email.value, password: password.value })
+    const response = await axios.post('http://localhost/api/auth/signup', {
+      name: name.value,
+      username: username.value,
+      email: email.value,
+      password: password.value
     });
-
-    if (!response.ok) {
-      throw new Error('Signup failed');
-    }
-
-    const data = await response.text();
-    message.value = data; // Display backend response
+    message.value = response.data;
   } catch (error) {
-    message.value = 'Error: ' + error.message;
+    message.value = 'Error: ' + (error.response?.data || 'Signup failed');
+    console.error('Signup error:', error);
   }
 };
+
+
 </script>
 
 <template>

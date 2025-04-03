@@ -1,56 +1,75 @@
 package com.Team5.SeniorProject.controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.Team5.SeniorProject.jwt.JwtUtils;
+import com.Team5.SeniorProject.jwt.LoginRequest;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/SignupController")
-@CrossOrigin(origins = "http://localhost:5173") 
+@RequestMapping("/api/auth") // Changed to match SecurityConfig
+@CrossOrigin(origins = "http://localhost:5173")
 public class SignupController {
 
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final AuthenticationManager authenticationManager;
+	private final JwtUtils jwtUtils;
 
-	public SignupController(UserRepository userRepository) {
+	@Autowired
+	public SignupController(UserRepository userRepository, PasswordEncoder passwordEncoder,
+							AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
 		this.userRepository = userRepository;
-	}
-	
-	@PostMapping
-	public String signup(@RequestBody User user) {
-		// Simulate saving user (later replace with a database)
-		userRepository.save(user);
-		return "User signed up successfully!";
+		this.passwordEncoder = passwordEncoder;
+		this.authenticationManager = authenticationManager;
+		this.jwtUtils = jwtUtils;
 	}
 
-	@GetMapping("/users")
-	public List<User> getAllUsers() {
-		
-		return userRepository.findAll();
+	@PostMapping("/signup")
+	public ResponseEntity<String> signup(@RequestBody User user) {
+		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+			return ResponseEntity.badRequest().body("Error: Username already exists!");
+		}
+		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+			return ResponseEntity.badRequest().body("Error: Email already exists!");
+		}
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setRoles("USER"); // Default role
+		userRepository.save(user);
+		return ResponseEntity.ok("User signed up successfully!");
 	}
 
 	@PostMapping("/login")
-	public String login(@RequestBody User loginUser) {
-		Optional<User> existingUser = userRepository.findByUsername(loginUser.getUsername());
-
-		if (existingUser.isPresent() && existingUser.get().getPassword().equals(loginUser.getPassword())) {
-			return "Login successful! Welcome " + existingUser.get().getName();
-		} else {
-			return "Invalid email or password!";
+	public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
+		System.out.println("Login attempt - Username: " + loginRequest.getUsername() + ", Password: " + loginRequest.getPassword());
+		try {
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+			);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			String jwt = jwtUtils.generateTokenFromUsername(userDetails);
+			System.out.println("Login successful - JWT: " + jwt);
+			return ResponseEntity.ok(jwt);
+		} catch (AuthenticationException e) {
+			System.out.println("Authentication failed: " + e.getMessage());
+			throw e; // Let AuthEntryPointJwt handle it
 		}
 	}
 
-	@GetMapping("/login")
-	public String login() {
-		return "Who are you?";
+	@GetMapping("/users")
+	public ResponseEntity<List<User>> getAllUsers() {
+		return ResponseEntity.ok(userRepository.findAll());
 	}
-	
 }

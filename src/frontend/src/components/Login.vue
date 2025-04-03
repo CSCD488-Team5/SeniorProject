@@ -1,27 +1,26 @@
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios'; // Switch to Axios
+import TokenService from "@/scripts/TokenService.js";
 
+const router = useRouter();
 const username = ref('');
 const password = ref('');
 const message = ref('');
 
 const login = async () => {
   try {
-    const response = await fetch('http://localhost/api/SignupController/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username.value, password: password.value })
+    const response = await axios.post('http://localhost/api/auth/login', { //Generates the token from the backend
+      username: username.value,
+      password: password.value
     });
-
-    const data = await response.text();
-
-    if (!response.ok) {
-      throw new Error(data || 'Login failed');
-    }
-
-    message.value = `✅ ${data}`; // Success message
+    TokenService.saveToken(response.data);//  This saves to the local storage
+    message.value = `Logged in! Token saved.`; // Success message
+    router.push('/PostPage'); // Redirect to PostPage
   } catch (error) {
-    message.value = `❌ ${error.message}`; // Error message
+    message.value = `${error.response?.data?.message || 'Login failed'}`; // Error message
+    console.error('Login error:', error);
   }
 };
 </script>
@@ -29,7 +28,7 @@ const login = async () => {
 <template>
   <div class="container">
     <div class="top-right">
-      <router-link to="/Signup" class="signup-button">Sign Up</router-link>
+      <router-link to="/signup" class="signup-button">Sign Up</router-link> <!-- Fixed route case -->
     </div>
     <div class="login-box">
       <h2 class="title">Login</h2>
@@ -37,12 +36,12 @@ const login = async () => {
         <div class="form-group">
           <label for="username">Username</label>
           <input
-              type="username"
-              id="username"
-              v-model="username"
-              class="input-field"
-              placeholder="Enter your username"
-              required
+              type="text"
+          id="username"
+          v-model="username"
+          class="input-field"
+          placeholder="Enter your username"
+          required
           />
         </div>
         <div class="form-group">
