@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios'; // Switch to Axios
+import TokenService from "@/scripts/TokenService.js";
 
 const router = useRouter();
 const username = ref('');
@@ -10,16 +11,15 @@ const message = ref('');
 
 const login = async () => {
   try {
-    const response = await axios.post('http://localhost/api/auth/login', {
+    const response = await axios.post('http://localhost/api/auth/login', { //Generates the token from the backend
       username: username.value,
       password: password.value
     });
-    const token = response.data; // JWT token from backend
-    localStorage.setItem('token', token); // Save to localStorage
-    message.value = `✅ Logged in! Token saved.`; // Success message
+    TokenService.saveToken(response.data);//  This saves to the local storage
+    message.value = `Logged in! Token saved.`; // Success message
     router.push('/PostPage'); // Redirect to PostPage
   } catch (error) {
-    message.value = `❌ ${error.response?.data?.message || 'Login failed'}`; // Error message
+    message.value = `${error.response?.data?.message || 'Login failed'}`; // Error message
     console.error('Login error:', error);
   }
 };
