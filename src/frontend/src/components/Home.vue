@@ -20,27 +20,26 @@
 </template>
 
 <script setup>
-import EventCard from '@/components/EventCard.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue';
+import EventCard from './EventCard.vue';
 
-const show = ref(false)
+const events = ref([]); // Reactive variable for events
 
-const events = ref([]) // Reactive variable for events
+const { appContext } = getCurrentInstance();
+const axios = appContext.config.globalProperties.$http; // Uses token from main.js interceptor
 
 onMounted(async () => {
   try {
-    // Fetch events from backend endpoint
-    const response = await fetch('http://localhost:80/api/events')
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    events.value = await response.json()
+    // Fetch events from backend endpoint using axios now
+    const response = await axios.get("http://localhost/api/events");
+    events.value = response.data;
   } catch (error) {
-    console.error('Error fetching events:', error)
+    console.error("Error loading events:", error);
+    alert("You must be logged in to see events.");
   }
-})
+});
 </script>
+
 
 <style scoped>
 .home
