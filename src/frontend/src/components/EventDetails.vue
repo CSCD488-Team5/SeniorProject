@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -31,17 +31,17 @@ const eventId = route.params.id
 // We'll store the fetched event in a reactive variable
 const eventData = ref(null)
 
+// Using the configured axios that is used in main.js
+const { appContext } = getCurrentInstance()
+const axios = appContext.config.globalProperties.$http
+
 onMounted(async () => {
   try {
-    // Replace 'http://localhost:8080' with the actual host/port of your Spring Boot backend
-    const response = await fetch(`http://localhost:80/api/events/${eventId}`)
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    // Parse JSON and assign to eventData
-    eventData.value = await response.json()
+    const response = await axios.get(`http://localhost/api/events/${eventId}`)
+    eventData.value = response.data // Axios parses it in json automatically
   } catch (error) {
     console.error('Error fetching event details:', error)
+    alert('You must be logged in to view this event.') // We can delete this later, debugging purposes lol
   }
 })
 
