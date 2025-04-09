@@ -4,6 +4,7 @@ import com.Team5.SeniorProject.jwt.JwtUtils;
 import com.Team5.SeniorProject.jwt.LoginRequest;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,11 +18,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.Team5.SeniorProject.service.UserService;
+
 @RestController
 @RequestMapping("/api/auth") // Changed to match SecurityConfig
 @CrossOrigin(origins = "http://localhost:5173")
 public class SignupController {
 
+    private final UserService userService;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
@@ -29,25 +33,23 @@ public class SignupController {
 
 	@Autowired
 	public SignupController(UserRepository userRepository, PasswordEncoder passwordEncoder,
-							AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+							AuthenticationManager authenticationManager, JwtUtils jwtUtils, UserService userService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.authenticationManager = authenticationManager;
 		this.jwtUtils = jwtUtils;
+		this.userService = userService;
 	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> signup(@RequestBody User user) {
-		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-			return ResponseEntity.badRequest().body("Error: Username already exists!");
-		}
-		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-			return ResponseEntity.badRequest().body("Error: Email already exists!");
-		}
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setRoles("USER"); // Default role
-		userRepository.save(user);
-		return ResponseEntity.ok("User signed up successfully!");
+		try {
+            // For regular signup, assign USER role
+            userService.signup(user, "USER");
+            return ResponseEntity.ok("User signed up successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 	}
 
 	@PostMapping("/login")
