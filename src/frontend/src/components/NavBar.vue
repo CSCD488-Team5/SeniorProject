@@ -1,5 +1,9 @@
 <script setup>
 import man from "@/assets/man.png"; // Import man image for icon
+import ProfileDropdown from "@/components/ProfileDropdown.vue";
+import { getUsernameFromToken} from "@/utils/jwt.js";
+
+const username = getUsernameFromToken();
 </script>
 
 <template>
@@ -9,12 +13,7 @@ import man from "@/assets/man.png"; // Import man image for icon
     <v-btn text to="/Home">Home</v-btn>
     <v-btn text to="/PostPage">Posts</v-btn>
     <v-btn text to="/Login">Login</v-btn>
-    <v-btn text>
-      <v-avatar size="32" color="red">
-        <v-img :src="man"></v-img>
-      </v-avatar>
-      <span class="ml-2">John Doe</span>
-    </v-btn>
+    <ProfileDropdown :username="username"/>
   </v-app-bar>
 </template>
 
