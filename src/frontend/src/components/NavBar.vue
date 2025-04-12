@@ -7,7 +7,8 @@ const theme = useTheme()
 
 
 // Use localStorage to persist user's choice
-const isDark = ref(localStorage.getItem('theme') === 'dark')
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+const isDark = ref(localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark))
 
 watch(isDark, (val) => {
   theme.global.name.value = val ? 'dark' : 'light'
@@ -28,8 +29,10 @@ function toggleTheme() {
     <v-btn text to="/Login">Login</v-btn>
 
     <!-- Dark Mode Toggle Switch -->
-    <v-btn icon @click="toggleTheme" class="mx-2" :color="isDark ? 'amber' : 'black'">
-      <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night' }}</v-icon>
+    <v-btn icon @click="toggleTheme" class="mx-2 animated-toggle">
+      <v-fade-transition mode="out-in">
+        <v-icon :color="isDark ? 'amber' : 'black'">{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night' }}</v-icon>
+      </v-fade-transition>
     </v-btn>
 
     <v-btn text>
@@ -41,4 +44,12 @@ function toggleTheme() {
   </v-app-bar>
 </template>
 
-<style scoped></style>
+<style scoped>
+.animated-toggle .v-icon {
+  transition: transform 0.5s ease;
+}
+
+.animated-toggle:active .v-icon {
+  transform: rotate(360deg);
+}
+</style>
