@@ -12,8 +12,8 @@
 </template>
 
 <style>
-.app{
-  background-color: white;
+#app {
+  min-height: 100vh;
 }
 </style>
 <script setup lang="ts">
