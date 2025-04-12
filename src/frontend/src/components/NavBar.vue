@@ -2,22 +2,28 @@
 import man from "@/assets/man.png"; // Import man image for icon
 import ProfileDropdown from "@/components/ProfileDropdown.vue";
 import { getUsernameFromToken } from "@/utils/jwt.js";
-import { onMounted, ref } from "vue";
+import {onMounted, ref,} from "vue";
 
 const username = ref('');
 
+const refreshUsername = () => {
+  const token = localStorage.getItem("token")
+  if (token) {
+    username.value = getUsernameFromToken()
+  } else {
+    username.value = ""
+  }
+}
+
+// refresh on page load
 onMounted(() => {
-  const checkToken = setInterval(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const name = getUsernameFromToken();
-      console.log("Token loaded. Username:", name);
-      username.value = name;
-      clearInterval(checkToken); // stop checking once we got it
-    }
-  }, 200); // check every 200ms
+  refreshUsername()
+  window.addEventListener("user-logged-in", refreshUsername)
 })
 
+const handleLogout = () => {
+  username.value = ""
+}
 </script>
 
 <template>
@@ -26,8 +32,8 @@ onMounted(() => {
     <v-spacer></v-spacer>
     <v-btn text to="/Home">Home</v-btn>
     <v-btn text to="/PostPage">Posts</v-btn>
-    <v-btn text to="/Login">Login</v-btn>
-    <ProfileDropdown :username="username" />
+    <v-btn v-if="!username" text to="/Login">Login</v-btn>
+    <ProfileDropdown v-if="username" :username="username" @logout="handleLogout" />
   </v-app-bar>
 </template>
 

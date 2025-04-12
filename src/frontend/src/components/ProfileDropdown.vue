@@ -11,6 +11,7 @@ defineProps({
   }
 })
 
+const emit = defineEmits(["logout"])
 const router = useRouter()
 const menu = ref(false)
 const showPasswordDialog = ref(false)
@@ -48,6 +49,7 @@ const submitChangePassword = async () => {
 // Sign out logic
 const signOut = () => {
   localStorage.removeItem("token")
+  emit("logout")
   router.push("/Login")
 }
 </script>
