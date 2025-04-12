@@ -28,12 +28,64 @@
     <v-select v-if="filterOption === 'people'" v-model="selectedValue" :items="peopleOptions" label="Select a person"
       class="mb-4" dense clearable outlined />
 
-    <v-row>
+
+    <!-- Pagination -->
+    <!-- Followed Events Grid or Skeleton Loader -->
+<v-fade-transition>
+  <v-row v-if="!loading">
+    <v-col
+      v-for="event in paginatedEvents"
+      :key="event.id"
+      cols="12"
+      sm="6"
+      md="4"
+    >
+      <EventCard
+        :id="event.id"
+        :imageSrc="event.imageBase64"
+        :title="event.title"
+        :subtitle="event.subtitle"
+        :content="event.content"
+      />
+    </v-col>
+  </v-row>
+
+  <!-- Skeleton loader while loading -->
+  <v-row v-else>
+    <v-col
+      v-for="n in itemsPerPage"
+      :key="n"
+      cols="12"
+      sm="6"
+      md="4"
+    >
+      <v-skeleton-loader
+        type="image, article"
+        height="250"
+        class="mb-4"
+      />
+    </v-col>
+  </v-row>
+</v-fade-transition>
+
+<!-- Pagination Control -->
+<v-fade-transition>
+  <v-pagination
+    v-if="!loading && totalPages > 1"
+    v-model="currentPage"
+    :length="totalPages"
+    class="my-4 d-flex justify-center"
+    rounded
+    color="primary"
+  />
+</v-fade-transition>
+
+    <!-- <v-row>
       <v-col v-for="event in followedEvents" :key="event.id" cols="12" sm="6" md="4">
         <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
           :content="event.content" />
       </v-col>
-    </v-row>
+    </v-row> -->
   </v-sheet>
 
 
@@ -44,7 +96,7 @@ import { ref, onMounted, getCurrentInstance, computed, watch } from 'vue';
 import EventCard from './EventCard.vue';
 
 const events = ref([]); // Reactive variable for events
-const allFollowedEvents = ref([ // hardcoded followed events
+const allFollowedEvents = ref([
   {
     id: 101,
     title: "Basketball Game",
@@ -90,7 +142,96 @@ const allFollowedEvents = ref([ // hardcoded followed events
     category: "Science",
     createdBy: "ProfJane"
   },
-  // Add more as needed...
+  {
+    id: 106,
+    title: "Art Showcase",
+    subtitle: "Student Gallery",
+    content: "A collection of student artwork.",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Art+Showcase",
+    category: "Arts",
+    createdBy: "ArtProf"
+  },
+  {
+    id: 107,
+    title: "Chemistry Lab",
+    subtitle: "Acids & Bases",
+    content: "Live demo in science building.",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Chem+Lab",
+    category: "Science",
+    createdBy: "ProfJane"
+  },
+  {
+    id: 108,
+    title: "Hackathon",
+    subtitle: "24-hour coding event",
+    content: "Teams compete to build apps.",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Hackathon",
+    category: "Tech",
+    createdBy: "DevJoe"
+  },
+  {
+    id: 109,
+    title: "Football Tailgate",
+    subtitle: "Before the big game",
+    content: "Food, games, and spirit!",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Tailgate",
+    category: "Sports",
+    createdBy: "CoachMike"
+  },
+  {
+    id: 110,
+    title: "Data Science Meetup",
+    subtitle: "Trends in Machine Learning",
+    content: "Networking and talks.",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Data+Science",
+    category: "Tech",
+    createdBy: "DevJoe"
+  },
+  {
+    id: 111,
+    title: "Open Mic Night",
+    subtitle: "Poetry and music",
+    content: "Sign up to perform!",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Open+Mic",
+    category: "Arts",
+    createdBy: "ClubEvents"
+  },
+  {
+    id: 112,
+    title: "Astronomy Club",
+    subtitle: "Night Sky Viewing",
+    content: "Telescope setup on roof",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Astronomy",
+    category: "Science",
+    createdBy: "ProfJane"
+  },
+  {
+    id: 113,
+    title: "D&D Game Night",
+    subtitle: "Fantasy & fun",
+    content: "Join a campaign!",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=DND",
+    category: "Games",
+    createdBy: "ClubEvents"
+  },
+  {
+    id: 114,
+    title: "Debate Club",
+    subtitle: "Free Speech Forum",
+    content: "Discuss current issues.",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Debate",
+    category: "Politics",
+    createdBy: "ProfJane"
+  },
+  {
+    id: 115,
+    title: "Startup Pitch Night",
+    subtitle: "Student Entrepreneurs",
+    content: "Pitch your business idea!",
+    imageBase64: "https://via.placeholder.com/300x200.png?text=Startup+Night",
+    category: "Business",
+    createdBy: "DevJoe"
+  }
 ]);
 
 
@@ -120,14 +261,36 @@ onMounted(async () => {
     // Fetch events from backend endpoint using axios now
     const response = await axios.get("http://localhost/api/events");
     events.value = response.data;
+    loading.value = true; // Set loading to false after data is fetched
   } catch (error) {
     console.error("Error loading events:", error);
     alert("You must be logged in to see events.");
+  } finally {
+    loading.value = false; // Set loading to false after data is fetched
   }
 });
 
-watch(filterOption, () => {
+
+// Pagination logic (if needed in the future)
+const currentPage = ref(1);
+const itemsPerPage =6; // Number of items per page
+const loading = ref(false); // Loading state
+
+const paginatedEvents = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return followedEvents.value.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(followedEvents.value.length / itemsPerPage);
+});
+
+watch(filterOption, async () => {
+  loading.value = true; // Set loading to true when filter changes
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate loading delay
   selectedValue.value = null; // reset dropdown when switching filter type
+  currentPage.value = 1; // reset pagination when switching filter type
+  loading.value = false; // Set loading to false after data is fetched
 });
 </script>
 
@@ -156,5 +319,10 @@ watch(filterOption, () => {
 .mb-4
 {
   margin-bottom: 16px;
+}
+
+.v-fade-transition-enter-active,
+.v-fade-transition-leave-active {
+  transition: opacity 0.5s ease;
 }
 </style>
