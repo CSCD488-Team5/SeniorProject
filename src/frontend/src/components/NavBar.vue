@@ -2,7 +2,7 @@
 import man from "@/assets/man.png"; // Import man image for icon
 import ProfileDropdown from "@/components/ProfileDropdown.vue";
 import { getUsernameFromToken } from "@/utils/jwt.js";
-import {onMounted, ref,} from "vue";
+import {onMounted, onUnmounted, ref,} from "vue";
 
 const username = ref('');
 
@@ -18,8 +18,14 @@ const refreshUsername = () => {
 // refresh on page load
 onMounted(() => {
   refreshUsername()
-  window.addEventListener("user-logged-in", refreshUsername)
+  window.addEventListener("user-logged-in", refreshUsername);
+  window.addEventListener("user-logged-out", refreshUsername);
 })
+
+onUnmounted(() => {
+  window.removeEventListener("user-logged-in", refreshUsername);
+  window.removeEventListener("user-logged-out", refreshUsername); // 👈 AND THIS
+});
 
 const handleLogout = () => {
   username.value = ""

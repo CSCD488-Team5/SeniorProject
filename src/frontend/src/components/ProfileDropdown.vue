@@ -36,6 +36,7 @@ const submitChangePassword = async () => {
       newPassword.value = ""
       showPasswordDialog.value = false
       localStorage.removeItem("token")
+      window.dispatchEvent(new Event("user-logged-out"))
       router.push("/Login")
     }, 1000)
 
