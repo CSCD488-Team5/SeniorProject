@@ -2,6 +2,7 @@ package com.Team5.SeniorProject.controller;
 
 
 import com.Team5.SeniorProject.model.Event;
+import com.Team5.SeniorProject.model.Post;
 import com.Team5.SeniorProject.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,12 @@ public class PostPageController {
     @GetMapping("/{id}")
     public List<Event> getEventsByUserId(@PathVariable Long id) {
       return eventRepository.findByUser_Id(id);
+    }
+
+    @PostMapping("/createPost")
+    public ResponseEntity createPost(@RequestBody Event event) {
+        eventRepository.save(event);
+        return new ResponseEntity(event, HttpStatus.CREATED);
     }
 
 
