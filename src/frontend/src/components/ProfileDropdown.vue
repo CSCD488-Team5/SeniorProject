@@ -78,27 +78,33 @@ const signOut = () => {
   </v-menu>
 
   <v-dialog v-model="showPasswordDialog" persistent max-width="500">
-    <v-card>
+    <v-card rounded="lg" elevation="4">
       <v-card-title>Change Password</v-card-title>
-      <v-card-text>
-        <v-text-field
-            label="Current Password"
-            v-model="currentPassword"
-            type="password"
-        />
-        <v-text-field
-            label="New Password"
-            v-model="newPassword"
-            type="password"
-        />
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn color="primary" @click="submitChangePassword">Submit</v-btn>
-        <v-btn text @click="showPasswordDialog = false">Cancel</v-btn>
-      </v-card-actions>
+
+      <form @submit.prevent="submitChangePassword">
+        <v-card-text>
+          <v-text-field
+              label="Current Password"
+              v-model="currentPassword"
+              type="password"
+              required
+          />
+          <v-text-field
+              label="New Password"
+              v-model="newPassword"
+              type="password"
+              required
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" type="submit">Submit</v-btn>
+          <v-btn text @click="showPasswordDialog = false">Cancel</v-btn>
+        </v-card-actions>
+      </form>
     </v-card>
   </v-dialog>
+
 
   <!-- alert message logic-->
   <v-snackbar v-model="snackbar" timeout="1000" location="top">
