@@ -1,14 +1,16 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, getCurrentInstance} from 'vue';
 import EventCard from '@/components/EventCard.vue'; // adjust path if needed
 
 const posts = ref([]);
+const { appContext } = getCurrentInstance();
+const axios = appContext.config.globalProperties.$http;
 
 // Fetch posts from the backend when the component is mounted
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost/api/PostPageController');
-    posts.value = await res.json();
+    const response = await axios.get("http://localhost/api/PostPageController/2");
+    posts.value = response.data;
   } catch (err) {
     console.error('Error fetching posts:', err);
   }
