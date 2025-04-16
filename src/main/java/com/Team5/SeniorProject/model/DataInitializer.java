@@ -1,17 +1,22 @@
 package com.Team5.SeniorProject.model;
 
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
 import com.Team5.SeniorProject.repository.EventRepository;
+import com.Team5.SeniorProject.repository.UserRepository;
+import com.Team5.SeniorProject.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
 
 @Component
+@Order(2)
 public class DataInitializer implements CommandLineRunner {
 
 	// Point to your local images using the classpath resource
@@ -28,13 +33,24 @@ public class DataInitializer implements CommandLineRunner {
     private Resource event4Image;
 
 	private final EventRepository eventRepository;
+	private final UserRepository userRepository;
 
-    public DataInitializer(EventRepository eventRepository) {
+    public DataInitializer(EventRepository eventRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
+		this.userRepository = userRepository;
     }
 
 	@Override
     public void run(String... args) throws Exception {
+
+		User alice = userRepository.findByUsername("alice").orElse(null);
+		User bob = userRepository.findByUsername("bob").orElse(null);
+
+		if (alice == null || bob == null) {
+			System.out.println("Alice or Bob not found. Events will not be linked to users.");
+			return;
+		}
+
          // ========== EVENT 1 ==========
 		 byte[] imageBytes1 = FileCopyUtils.copyToByteArray(event1Image.getInputStream());
 		 String base64Image1 = Base64.getEncoder().encodeToString(imageBytes1);
@@ -42,10 +58,12 @@ public class DataInitializer implements CommandLineRunner {
 		 Event event1 = new Event();
 		 event1.setTitle("Outdoor Basketball Showdown");
 		 event1.setSubtitle("Feel the energy of the court");
-		 event1.setContent("Join us for an epic outdoor basketball event!");
+		 event1.setCategory("Sports");
+		 event1.setDescription("Join us for an epic outdoor basketball event!");
 		 event1.setTime(LocalDateTime.parse("2023-07-15T15:00:00"));
 		 event1.setLocation("Campus Basketball Court");
 		 event1.setImageBase64(base64Image1);
+		 event1.setUser(alice);
  
 		 eventRepository.save(event1);
  
@@ -56,11 +74,11 @@ public class DataInitializer implements CommandLineRunner {
 		 Event event2 = new Event();
 		 event2.setTitle("Graduation Commencement");
 		 event2.setSubtitle("Celebrating Academic Achievements");
-		 event2.setContent("Celebrate the graduation of our amazing class!");
+		 event2.setDescription("Celebrate the graduation of our amazing class!");
 		 event2.setTime(LocalDateTime.parse("2023-12-25T10:00:00"));
 		 event2.setLocation("Main Auditorium");
 		 event2.setImageBase64(base64Image2);
- 
+		 event2.setUser(bob);
 		 eventRepository.save(event2);
  
 		 // ========== EVENT 3 ==========
@@ -70,10 +88,11 @@ public class DataInitializer implements CommandLineRunner {
 		 Event event3 = new Event();
 		 event3.setTitle("Advanced Mathematics Workshop");
 		 event3.setSubtitle("Sharpen your problem-solving skills");
-		 event3.setContent("Dive into advanced math concepts in this interactive workshop.");
+		 event3.setDescription("Dive into advanced math concepts in this interactive workshop.");
 		 event3.setTime(LocalDateTime.parse("2023-11-05T09:00:00"));
 		 event3.setLocation("Engineering Building");
 		 event3.setImageBase64(base64Image3);
+		 event3.setUser(alice);
  
 		 eventRepository.save(event3);
  
@@ -84,10 +103,11 @@ public class DataInitializer implements CommandLineRunner {
 		 Event event4 = new Event();
 		 event4.setTitle("Evening of Inspiration");
 		 event4.setSubtitle("Ideas that spark change");
-		 event4.setContent("Join a dynamic lineup of speakers and performers for an immersive evening of inspiration.");
+		 event4.setDescription("Join a dynamic lineup of speakers and performers for an immersive evening of inspiration.");
 		 event4.setTime(LocalDateTime.parse("2023-10-20T18:00:00"));
 		 event4.setLocation("Performing Arts Center");
 		 event4.setImageBase64(base64Image4);
+		 event4.setUser(bob);
  
 		 eventRepository.save(event4);
     }

@@ -28,9 +28,19 @@ import 'vuetify/styles'
 import { createVuetify } from "vuetify";
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import DayJsAdapter from '@date-io/dayjs'
+import { VTimePicker } from 'vuetify/labs/VTimePicker'
+
+
 
 const vuetify = createVuetify({
-    components,
+    date: {
+        adapter: DayJsAdapter,
+    },
+    components: {
+        ...components,
+        VTimePicker,
+    },
     directives,
 })
 
