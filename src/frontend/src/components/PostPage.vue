@@ -1,62 +1,3 @@
-<script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue';
-import EventCard from '@/components/EventCard.vue'; // adjust path if needed
-
-// Reactive state
-const posts = ref([]);
-const showModal = ref(false);
-const dateMenu = ref(false);
-const timeMenu = ref(false);
-
-// Form data for creating a new post
-const form = ref({
-  title: '',
-  subtitle: '',
-  description: '',
-  category: '',
-  location: '',
-  date: '',
-  time: ''
-});
-
-// Axios instance from Vue global properties
-const { appContext } = getCurrentInstance();
-const axios = appContext.config.globalProperties.$http;
-
-// Fetch posts from the backend when the component is mounted
-onMounted(async () => {
-  try {
-    const response = await axios.get("http://localhost/api/PostPageController");
-    posts.value = response.data;
-  } catch (err) {
-    console.error('Error fetching posts:', err);
-  }
-});
-
-// Submit post function
-const submitPost = async () => {
-  try {
-    const response = await axios.post("http://localhost/api/createPost", postData);
-    posts.value.push(response.data);
-    showModal.value = false;
-    form.value = {
-      title: '',
-      subtitle: '',
-      description: '',
-      category: '',
-      location: '',
-      date: '',
-      time: ''
-    };
-  } catch (error) {
-
-    console.error("Post did not create!");
-    alert("Failed to create post");
-  }
-};
-
-</script>
-
 <template>
   <!-- Create Post Button -->
   <v-btn color="primary" @click="showModal = true">Create New Post</v-btn>
@@ -111,9 +52,7 @@ const submitPost = async () => {
               :id="post.id"
               :title="post.title"
               :subtitle="post.subtitle"
-              :category="post.category"
-              :description="post.description"
-              :imageSrc="post.imageBase64"
+          :imageSrc="post.imageBase64"
           />
         </v-col>
       </v-row>
@@ -121,28 +60,56 @@ const submitPost = async () => {
   </div>
 </template>
 
-<style scoped>
-.page-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  background-color: #f3f4f6;
-  padding: 40px 20px;
-}
+<script setup>
+import { ref, onMounted, getCurrentInstance } from 'vue';
+import EventCard from '@/components/EventCard.vue'; // Adjust path if needed
 
-.posts-box {
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 1300px;
-  width: 100%;
-}
+const posts = ref([]);
+const showModal = ref(false);
+const dateMenu = ref(false);
+const timeMenu = ref(false);
+const form = ref({
+  title: '',
+  subtitle: '',
+  description: '',
+  category: '',
+  location: '',
+  date: '',
+  time: '',
+});
 
-.text-h5 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-</style>
+// Axios setup
+const { appContext } = getCurrentInstance();
+const axios = appContext.config.globalProperties.$http;
 
+// Fetch posts from the backend when the component is mounted
+onMounted(async () => {
+  try {
+    const response = await axios.get("http://localhost/api/PostPageController/2");
+    posts.value = response.data;
+  } catch (err) {
+    console.error('Error fetching posts:', err);
+  }
+});
+
+// Handle form submission for creating a post
+const submitPost = async () => {
+  try {
+    const postData = {
+      title: form.value.title,
+      subtitle: form.value.subtitle,
+      content: form.value.description, // Ensure 'content' is set correctly
+      category: form.value.category,
+      location: form.value.location,
+      date: form.value.date,
+      time: form.value.time,
+    };
+    await axios.post('http://localhost/api/PostPageController/createPost', postData);
+    showModal.value = false;
+    posts.value.push(postData);
+  } catch (error) {
+    console.error('Error creating post:', error);
+    alert("Post was not created");
+  }
+};
+</script>
