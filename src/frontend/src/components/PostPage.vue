@@ -28,7 +28,11 @@
             <template v-slot:activator="{ props }">
               <v-text-field v-bind="props" v-model="form.time" label="Time" readonly />
             </template>
-            <v-time-picker v-model="form.time" format="24hr" @update:model-value="timeMenu = false" />
+            <v-time-picker
+              v-model="form.time"
+              format="24hr"
+              @update:model-value="timeMenu = false"
+            />
           </v-menu>
 
           <v-btn type="submit" color="success" class="mt-4">Submit</v-btn>
@@ -49,10 +53,10 @@
       <v-row v-else justify="center" align="stretch" class="post-grid">
         <v-col v-for="post in posts" :key="post.id" cols="12" sm="6" md="4" lg="3">
           <EventCard
-              :id="post.id"
-              :title="post.title"
-              :subtitle="post.subtitle"
-          :imageSrc="post.imageBase64"
+            :id="post.id"
+            :title="post.title"
+            :subtitle="post.subtitle"
+            :imageSrc="post.imageBase64"
           />
         </v-col>
       </v-row>
@@ -61,21 +65,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue';
-import EventCard from '@/components/EventCard.vue'; // Adjust path if needed
+import { ref, onMounted, getCurrentInstance } from "vue";
+import EventCard from "@/components/EventCard.vue"; // Adjust path if needed
 
 const posts = ref([]);
 const showModal = ref(false);
 const dateMenu = ref(false);
 const timeMenu = ref(false);
 const form = ref({
-  title: '',
-  subtitle: '',
-  description: '',
-  category: '',
-  location: '',
-  date: '',
-  time: '',
+  title: "",
+  subtitle: "",
+  description: "",
+  category: "",
+  location: "",
+  date: "",
+  time: "",
 });
 
 // Axios setup
@@ -88,27 +92,36 @@ onMounted(async () => {
     const response = await axios.get("http://localhost/api/PostPageController/2");
     posts.value = response.data;
   } catch (err) {
-    console.error('Error fetching posts:', err);
+    console.error("Error fetching posts:", err);
   }
 });
 
 // Handle form submission for creating a post
 const submitPost = async () => {
+  const userId = 2;
+  
   try {
+    const toIsoString = (date, time) => {
+      const yyyyMMdd = new Date(date).toISOString().split("T")[0];
+      return `${yyyyMMdd}T${time}`;
+    };
+
+    const dateTime = toIsoString(form.value.date, form.value.time);
+
     const postData = {
       title: form.value.title,
       subtitle: form.value.subtitle,
-      content: form.value.description, // Ensure 'content' is set correctly
+      description: form.value.description,
       category: form.value.category,
       location: form.value.location,
-      date: form.value.date,
-      time: form.value.time,
+      time: dateTime,
+      user: { id: userId },
     };
-    await axios.post('http://localhost/api/PostPageController/createPost', postData);
+    await axios.post("http://localhost/api/PostPageController/createPost", postData);
     showModal.value = false;
     posts.value.push(postData);
   } catch (error) {
-    console.error('Error creating post:', error);
+    console.error("Error creating post:", error);
     alert("Post was not created");
   }
 };
