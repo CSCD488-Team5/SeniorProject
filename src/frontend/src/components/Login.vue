@@ -16,6 +16,7 @@ const login = async () => {
       password: password.value
     });
     TokenService.saveToken(response.data);//  This saves to the local storage
+    window.dispatchEvent(new Event("user-logged-in"))
     message.value = `Logged in! Token saved.`; // Success message
     router.push('/PostPage'); // Redirect to PostPage
   } catch (error) {
