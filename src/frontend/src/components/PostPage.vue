@@ -26,7 +26,7 @@ const axios = appContext.config.globalProperties.$http;
 // Fetch posts from the backend when the component is mounted
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost/api/PostPageController/2");
+    const response = await axios.get("http://localhost/api/PostPageController");
     posts.value = response.data;
   } catch (err) {
     console.error('Error fetching posts:', err);
