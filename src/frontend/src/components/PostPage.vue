@@ -73,7 +73,10 @@
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, watch } from "vue";
-import EventCard from "@/components/EventCard.vue"; // Adjust path if needed
+import EventCard from "@/components/EventCard.vue";
+import TokenService from "@/scripts/TokenService.js";
+import tokenService from "@/scripts/TokenService.js"; // Adjust path if needed
+import {getUsernameFromToken} from "@/utils/jwt.js";
 
 const postForm = ref(null);
 const requiredRule = value => !!value || 'This field is required';
@@ -102,8 +105,9 @@ const axios = appContext.config.globalProperties.$http;
 
 // Fetch posts from the backend when the component is mounted
 onMounted(async () => {
+  const username = getUsernameFromToken();
   try {
-    const response = await axios.get("http://localhost/api/PostPageController/2");
+    const response = await axios.get(`http://localhost/api/PostPageController/${username}`);
     posts.value = response.data;
   } catch (err) {
     console.error("Error fetching posts:", err);

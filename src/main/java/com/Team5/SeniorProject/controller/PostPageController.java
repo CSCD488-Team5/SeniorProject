@@ -24,9 +24,9 @@ public class PostPageController {
         return eventRepository.findAll();
     }
 
-    @GetMapping("/{id}")
-    public List<Event> getEventsByUserId(@PathVariable Long id) {
-      return eventRepository.findByUser_Id(id);
+    @GetMapping("/{username}")
+    public List<Event> getEventsByUserId(@PathVariable String username) {
+      return eventRepository.findByUser_Username(username);
     }
 
     @PostMapping("/createPost")
@@ -35,7 +35,7 @@ public class PostPageController {
         return new ResponseEntity(event, HttpStatus.CREATED);
     }
 
-    @PostMapping("/deletePost/{id}")
+    @PostMapping("/deletePost/{id}")//id - Represents the id attached to the post
     public ResponseEntity deletePost(@PathVariable Long id) {
         if (!eventRepository.existsById(id)) {
             return ResponseEntity.notFound().build();//Return "Not Found" Error
@@ -45,5 +45,4 @@ public class PostPageController {
             return ResponseEntity.noContent().build();//The Deletion was done successfully
         }
     }
-
 }
