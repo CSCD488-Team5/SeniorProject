@@ -8,17 +8,17 @@
       <v-card-title>Create New Post</v-card-title>
 
       <v-card-text>
-        <v-form @submit.prevent="submitPost">
-          <v-text-field v-model="form.title" label="Title" required />
-          <v-text-field v-model="form.subtitle" label="Subtitle" required />
-          <v-textarea v-model="form.description" label="Description" required />
-          <v-text-field v-model="form.category" label="Category" required />
-          <v-text-field v-model="form.location" label="Location" required />
+        <v-form ref="postForm" @submit.prevent="submitPost">
+          <v-text-field v-model="form.title" label="Title"  :rules="[requiredRule]"/>
+          <v-text-field v-model="form.subtitle" label="Subtitle" :rules="[requiredRule]" />
+          <v-textarea v-model="form.description" label="Description" :rules="[requiredRule]" />
+          <v-text-field v-model="form.category" label="Category" :rules="[requiredRule]" />
+          <v-text-field v-model="form.location" label="Location" :rules="[requiredRule]" />
 
           <!-- Date Picker -->
           <v-menu v-model="dateMenu" transition="scale-transition" offset-y>
             <template v-slot:activator="{ props }">
-              <v-text-field v-bind="props" v-model="form.date" label="Date" readonly />
+              <v-text-field v-bind="props" v-model="form.date" label="Date" :rules="[dateRule]" readonly />
             </template>
             <v-date-picker v-model="form.date" @update:model-value="dateMenu = false" />
           </v-menu>
@@ -26,7 +26,7 @@
           <!-- Time Picker -->
           <v-menu v-model="timeMenu" transition="scale-transition" offset-y>
             <template v-slot:activator="{ props }">
-              <v-text-field v-bind="props" v-model="form.time" label="Time" readonly />
+              <v-text-field v-bind="props" v-model="form.time" label="Time" :rules="[timeRule]" readonly />
             </template>
             <v-time-picker
               v-model="form.time"
@@ -68,6 +68,11 @@
 import { ref, onMounted, getCurrentInstance } from "vue";
 import EventCard from "@/components/EventCard.vue"; // Adjust path if needed
 
+const postForm = ref(null);
+const requiredRule = value => !!value || 'This field is required';
+const dateRule = value => !!value || 'Date is required';
+const timeRule = value => !!value || 'Time is required';
+
 const posts = ref([]);
 const showModal = ref(false);
 const dateMenu = ref(false);
@@ -99,6 +104,19 @@ onMounted(async () => {
 // Handle form submission for creating a post
 const submitPost = async () => {
   const userId = 2;
+
+  // Fields validation
+  const { valid } = await postForm.value.validate();
+  if (!valid) {
+    // alert("Please fill out all required fields.");
+    return;
+  }
+
+  // Date/time validation
+  if (!form.value.date || !form.value.time) {
+    // alert("Date and Time are required.")
+    return;
+  }
   
   try {
     const toIsoString = (date, time) => {
