@@ -28,7 +28,7 @@ public class Event {
 	private String content;
 	
 	@Lob
-	private String imageBase64;
+	private String imageUrl;
 
 	private LocalDateTime time;
 	private String location;

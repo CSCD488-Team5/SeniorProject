@@ -2,7 +2,6 @@ package com.Team5.SeniorProject.controller;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,8 @@ import com.Team5.SeniorProject.repository.EventRepository;
 @RequestMapping("/api/events")
 @CrossOrigin(origins = "http://localhost:5173")
 public class EventController {
+
+    private static final String UPLOAD_DIR = "src/main/resources/static/images/events/";
 	
 	@Autowired
 	private EventRepository eventRepository;
@@ -37,7 +38,7 @@ public class EventController {
     @PostMapping("/upload")
     public ResponseEntity<Event> createEventWithImage(
             // Category
-            // Author 
+            // Author cle
             @RequestParam("title") String title,
             @RequestParam("subtitle") String subtitle,
             @RequestParam("content") String content,
@@ -46,13 +47,24 @@ public class EventController {
             @RequestParam("location") String location,
             @RequestParam("image") MultipartFile imageFile) {
         try {
+
+            // Step 1: Save image to /static/images/events/
+            String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+            java.nio.file.Path filePath = java.nio.file.Paths.get(UPLOAD_DIR, filename);
+            java.nio.file.Files.createDirectories(filePath.getParent());
+            java.nio.file.Files.write(filePath, imageFile.getBytes());
+
+            // Step 2: Build relative URL for serving
+            String imageUrl = "/images/events/" + filename;
+
+            // Step 3: Save event with imageUrl
             Event event = new Event();
             event.setTitle(title);
             event.setSubtitle(subtitle);
             event.setContent(content);
             event.setTime(LocalDateTime.parse(time));
             event.setLocation(location);
-            event.setImageBase64(Base64.getEncoder().encodeToString(imageFile.getBytes()));
+            event.setImageUrl(imageUrl);
             Event savedEvent = eventRepository.save(event);
             return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
         } catch (IOException e) {
