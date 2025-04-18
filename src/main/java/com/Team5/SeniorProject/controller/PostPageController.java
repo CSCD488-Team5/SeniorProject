@@ -35,5 +35,15 @@ public class PostPageController {
         return new ResponseEntity(event, HttpStatus.CREATED);
     }
 
+    @PostMapping("/deletePost/{id}")
+    public ResponseEntity deletePost(@PathVariable Long id) {
+        if (!eventRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();//Return "Not Found" Error
+
+        }else {
+            eventRepository.deleteById(id);
+            return ResponseEntity.noContent().build();//The Deletion was done successfully
+        }
+    }
 
 }
