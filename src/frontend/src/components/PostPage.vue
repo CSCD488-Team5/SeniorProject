@@ -35,6 +35,13 @@
             />
           </v-menu>
 
+          <v-file-input 
+            v-model="form.image"
+            label="Upload Image"
+            accept="image/*"
+            prepend-icon="mdi-camera"
+          />
+
           <v-btn type="submit" color="success" class="mt-4">Submit</v-btn>
         </v-form>
       </v-card-text>
@@ -65,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance } from "vue";
+import { ref, onMounted, getCurrentInstance, watch } from "vue";
 import EventCard from "@/components/EventCard.vue"; // Adjust path if needed
 
 const postForm = ref(null);
@@ -85,6 +92,8 @@ const form = ref({
   location: "",
   date: "",
   time: "",
+  image: null, // holds File object
+  imageBase64: "", // holds encoded string
 });
 
 // Axios setup
@@ -133,6 +142,7 @@ const submitPost = async () => {
       category: form.value.category,
       location: form.value.location,
       time: dateTime,
+      imageBase64: form.value.imageBase64,
       user: { id: userId },
     };
     await axios.post("http://localhost/api/PostPageController/createPost", postData);
@@ -143,4 +153,27 @@ const submitPost = async () => {
     alert("Post was not created");
   }
 };
+
+const onImageSelected = (files) => {
+  const file = Array.isArray(files) ? files[0] : files;
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    form.value.imageBase64 = reader.result;
+    console.log("✅ Image encoded:", form.value.imageBase64.slice(0, 50), "..."); // preview
+  };
+  reader.readAsDataURL(file);
+};
+
+watch(() => form.value.image, (file) => {
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    form.value.imageBase64 = reader.result;
+    console.log("✅ Encoded image:", reader.result.slice(0, 50), "...");
+  };
+  reader.readAsDataURL(file);
+});
 </script>
