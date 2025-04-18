@@ -49,7 +49,7 @@ public class EventController {
             Event event = new Event();
             event.setTitle(title);
             event.setSubtitle(subtitle);
-            event.setContent(content);
+            event.setDescription(content);
             event.setTime(LocalDateTime.parse(time));
             event.setLocation(location);
             event.setImageBase64(Base64.getEncoder().encodeToString(imageFile.getBytes()));
