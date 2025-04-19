@@ -1,13 +1,22 @@
 package com.Team5.SeniorProject.model;
 
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
+
 import org.springframework.stereotype.Component;
+
 
 @Component
 public class DataInitializer {
 
+
 	// // Point to your local images using the classpath resource
     // @Value("classpath:assets/events/event1/image.jpg")
     // private Resource event1Image;
+
 
 	// @Value("classpath:assets/events/event2/image.jpg")
     // private Resource event2Image;
