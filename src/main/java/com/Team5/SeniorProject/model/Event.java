@@ -24,7 +24,7 @@ public class Event {
 	private LocalDateTime time;
 	private String location;
 	@Lob
-	private String imageBase64;
+	private String imageUrl;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")

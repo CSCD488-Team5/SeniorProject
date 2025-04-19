@@ -36,10 +36,11 @@ const props = defineProps({
 })
 
 const computedImageSrc = computed(() => {
-	if (props.imageSrc && !props.imageSrc.startsWith('data:')) {
-		return `data:image/jpeg;base64,${props.imageSrc}`
-	}
-	return props.imageSrc
+	if (!props.imageSrc) return ''
+	// If imageSrc already has http, return it as is. Else, prepend localhost base.
+	return props.imageSrc.startsWith('http')
+		? props.imageSrc
+		: `http://localhost:80${props.imageSrc}`
 })
 
 const show = ref(false)
