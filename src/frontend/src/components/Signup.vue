@@ -1,7 +1,11 @@
 <script setup>
 import { ref } from 'vue';
 import axios from "axios";
+import { useRouter } from 'vue-router';
+import TokenService from '@/scripts/TokenService';
 
+
+const router = useRouter();
 const name = ref('');
 const username = ref('');
 const email = ref('');
@@ -10,16 +14,30 @@ const message = ref('');
 
 const signup = async () => {
   try {
-    const response = await axios.post('http://localhost/api/auth/signup', {
+    await axios.post('http://localhost/api/auth/signup', {
       name: name.value,
       username: username.value,
       email: email.value,
       password: password.value
     });
-    message.value = response.data;
+
+    const response = await axios.post('http://localhost/api/auth/login', {
+      username: username.value,
+      password: password.value
+    });
+
+    const token = response.data;
+    if (!token || typeof token !== 'string') {
+      throw new Error("Invalid token format");
+    }
+
+    TokenService.saveToken(token);
+    window.dispatchEvent(new Event("user-logged-in"));
+
+    router.push('/Home');
   } catch (error) {
-    message.value = 'Error: ' + (error.response?.data || 'Signup failed');
-    console.error('Signup error:', error);
+    message.value = 'Error: ' + (error.response?.data?.message || 'Signup/Login failed');
+    console.error('Signup/Login error:', error);
   }
 };
 
