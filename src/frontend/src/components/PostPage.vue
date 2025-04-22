@@ -120,7 +120,7 @@ const requiredRule = value => !!value || 'This field is required';
 const dateRule = value => !!value || 'Date is required';
 const timeRule = value => !!value || 'Time is required';
 
-const posts = ref([]);
+const posts = ref([]);//Holds the list of Events after you fetch.
 const showModal = ref(false);
 const dateMenu = ref(false);
 const timeMenu = ref(false);
@@ -141,8 +141,8 @@ const form = ref({
 const { appContext } = getCurrentInstance();
 const axios = appContext.config.globalProperties.$http;
 
-// Fetch posts from the backend when the component is mounted
-onMounted(async () => {
+//Used this method to remount
+const fetchPosts = async () => {
   const username = getUsernameFromToken();
   try {
     const response = await axios.get(`http://localhost/api/events/user/${username}`);
@@ -150,7 +150,10 @@ onMounted(async () => {
   } catch (err) {
     console.error("Error fetching posts:", err);
   }
-});
+};
+
+// Fetch posts from the backend when the component is mounted
+onMounted(fetchPosts);
 
 // Handle form submission for creating a post
 const submitPost = async () => {
@@ -182,9 +185,20 @@ const submitPost = async () => {
       }
     });
     showModal.value = false;
+    await fetchPosts();//Remounts the page
   } catch (error) {
     console.error("Error creating post:", error);
     alert("Post was not created");
+  }
+};
+
+const handleDelete = async (postId) => {
+  try{
+    await axios.delete(`http://localhost/api/events/delete/${postId}`);
+    await fetchPosts();//Remounts the page
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    alert("Failed to delete post.");
   }
 };
 
