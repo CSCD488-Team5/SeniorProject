@@ -5,6 +5,7 @@ import PostPage from "@/components/PostPage.vue";
 import { isTokenValid } from '../utils/jwt'
 import Home from "@/components/Home.vue";
 import EventDetails from "@/components/EventDetails.vue";
+import Profile from "@/components/Profile.vue";
 
 
 const routes = [
@@ -21,6 +22,7 @@ const routes = [
   { path: '/', redirect: '/Signup' }, // Redirect root to /Signup
   { path: '/Home', name: 'Home', component: Home },
   { path: '/Events/:id', name: 'EventDetails', component: EventDetails},
+  { path: '/Profile', name: 'Profile', component: Profile},
 ];
 
 const router = createRouter({
