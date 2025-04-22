@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios'; // Switch to Axios
+import axios from 'axios';
 import TokenService from "@/scripts/TokenService.js";
 
 const router = useRouter();
@@ -11,142 +11,72 @@ const message = ref('');
 
 const login = async () => {
   try {
-    const response = await axios.post('http://localhost/api/auth/login', { //Generates the token from the backend
+    const response = await axios.post('http://localhost/api/auth/login', {
       username: username.value,
       password: password.value
     });
-    TokenService.saveToken(response.data);//  This saves to the local storage
-    window.dispatchEvent(new Event("user-logged-in"))
-    message.value = `Logged in! Token saved.`; // Success message
-    router.push('/PostPage'); // Redirect to PostPage
+    TokenService.saveToken(response.data);
+    window.dispatchEvent(new Event("user-logged-in"));
+    message.value = "Logged in! Token saved.";
+    router.push('/Home');
   } catch (error) {
-    message.value = `${error.response?.data?.message || 'Login failed'}`; // Error message
+    message.value = error.response?.data?.message || 'Login failed';
     console.error('Login error:', error);
   }
 };
 </script>
 
 <template>
-  <div class="container">
-    <div class="top-right">
-      <router-link to="/signup" class="signup-button">Sign Up</router-link> <!-- Fixed route case -->
-    </div>
-    <div class="login-box">
-      <h2 class="title">Login</h2>
-      <form @submit.prevent="login">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input
-              type="text"
-          id="username"
+  <v-container class="fill-height d-flex align-center justify-center">
+    <v-card class="pa-6" width="400" elevation="8">
+      <v-card-title class="text-h5 text-center">Login</v-card-title>
+
+      <v-form @submit.prevent="login" ref="form">
+        <v-text-field
           v-model="username"
-          class="input-field"
-          placeholder="Enter your username"
+          label="Username"
+          prepend-inner-icon="mdi-account"
+          variant="outlined"
           required
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-              type="password"
-              id="password"
-              v-model="password"
-              class="input-field"
-              placeholder="Enter your password"
-              required
-          />
-        </div>
-        <button type="submit" class="login-button">Login</button>
-      </form>
-      <p v-if="message" class="message">{{ message }}</p>
-    </div>
-  </div>
+        />
+
+        <v-text-field
+          v-model="password"
+          label="Password"
+          prepend-inner-icon="mdi-lock"
+          variant="outlined"
+          type="password"
+          required
+        />
+
+        <v-btn
+          type="submit"
+          color="primary"
+          block
+          class="mt-4"
+        >
+          Login
+        </v-btn>
+
+        <v-alert
+          v-if="message"
+          type="info"
+          class="mt-4"
+          border="start"
+        >
+          {{ message }}
+        </v-alert>
+      </v-form>
+
+      <v-card-actions class="justify-end mt-4">
+        <v-btn
+          variant="tonal"
+          color="secondary"
+          to="/signup"
+        >
+          Sign Up
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>
 </template>
-
-<style scoped>
-.container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f3f4f6;
-  position: relative;
-}
-
-.top-right {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-}
-
-.signup-button {
-  padding: 0.5rem 1rem;
-  background-color: #10b981;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.signup-button:hover {
-  background-color: #059669;
-}
-
-.login-box {
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 100%;
-}
-
-.title {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #333;
-}
-
-.input-field {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-
-.login-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.login-button:hover {
-  background-color: #2563eb;
-}
-
-.message {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 1rem;
-}
-</style>

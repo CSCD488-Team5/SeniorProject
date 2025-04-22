@@ -30,7 +30,7 @@ onUnmounted(() => {
 const handleLogout = () => {
   username.value = ""
 }
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useTheme } from 'vuetify'
 
 const theme = useTheme()
@@ -58,20 +58,12 @@ function toggleTheme() {
     <v-btn text to="/PostPage">Posts</v-btn>
     <v-btn v-if="!username" text to="/Login">Login</v-btn>
     <ProfileDropdown v-if="username" :username="username" @logout="handleLogout" />
-    <v-btn text to="/Login">Login</v-btn>
 
     <!-- Dark Mode Toggle Switch -->
     <v-btn icon @click="toggleTheme" class="mx-2 animated-toggle">
       <v-fade-transition mode="out-in">
         <v-icon :color="isDark ? 'amber' : 'black'">{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night' }}</v-icon>
       </v-fade-transition>
-    </v-btn>
-
-    <v-btn text>
-      <v-avatar size="32" color="red">
-        <v-img :src="man"></v-img>
-      </v-avatar>
-      <span class="ml-2">John Doe</span>
     </v-btn>
   </v-app-bar>
 </template>

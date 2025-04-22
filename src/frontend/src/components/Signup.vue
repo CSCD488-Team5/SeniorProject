@@ -4,7 +4,6 @@ import axios from "axios";
 import { useRouter } from 'vue-router';
 import TokenService from '@/scripts/TokenService';
 
-
 const router = useRouter();
 const name = ref('');
 const username = ref('');
@@ -40,139 +39,73 @@ const signup = async () => {
     console.error('Signup/Login error:', error);
   }
 };
-
-
 </script>
 
 <template>
-  <div class="container">
-    <div class="top-right">
-      <router-link to="/login" class="signup-button">Login</router-link>
-    </div>
-    <div class="signup-box">
-      <h2 class="title">Sign Up</h2>
-      <form @submit.prevent="signup">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input
-              type="text"
-              id="name"
-              v-model="name"
-              class="input-field"
-              placeholder="Enter your name"
-              required
-          />
-        </div>
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input
-              type="text"
-              id="username"
-              v-model="username"
-              class="input-field"
-              placeholder="Enter a username"
-              required
-          />
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-              type="email"
-              id="email"
-              v-model="email"
-              class="input-field"
-              placeholder="Enter your email"
-              required
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-              type="password"
-              id="password"
-              v-model="password"
-              class="input-field"
-              placeholder="Enter your password"
-              required
-          />
-        </div>
-        <button type="submit" class="signup-button">Sign Up</button>
-      </form>
-      <p v-if="message" class="message">{{ message }}</p>
-    </div>
-  </div>
+  <v-container class="fill-height d-flex align-center justify-center">
+    <v-card class="pa-6" width="400" elevation="8">
+      <v-card-title class="text-h5 text-center">Sign Up</v-card-title>
+
+      <v-form @submit.prevent="signup" ref="form">
+        <v-text-field
+          v-model="name"
+          label="Name"
+          prepend-inner-icon="mdi-account-outline"
+          variant="outlined"
+          required
+        />
+        <v-text-field
+          v-model="username"
+          label="Username"
+          prepend-inner-icon="mdi-account"
+          variant="outlined"
+          required
+        />
+        <v-text-field
+          v-model="email"
+          label="Email"
+          prepend-inner-icon="mdi-email"
+          variant="outlined"
+          type="email"
+          required
+        />
+        <v-text-field
+          v-model="password"
+          label="Password"
+          prepend-inner-icon="mdi-lock"
+          variant="outlined"
+          type="password"
+          required
+        />
+
+        <v-btn
+          type="submit"
+          color="primary"
+          block
+          class="mt-4"
+        >
+          Sign Up
+        </v-btn>
+
+        <v-alert
+          v-if="message"
+          type="info"
+          class="mt-4"
+          border="start"
+        >
+          {{ message }}
+        </v-alert>
+      </v-form>
+
+      <v-card-actions class="justify-end mt-4">
+        <v-btn
+          variant="tonal"
+          color="secondary"
+          to="/login"
+        >
+          Login
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>
 </template>
-
-<style scoped>
-.container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f3f4f6;
-  position: relative;
-}
-
-.top-right {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-}
-
-.signup-button {
-  padding: 0.5rem 1rem;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color 0.3s;
-}
-
-.signup-button:hover {
-  background-color: #2563eb;
-}
-
-.signup-box {
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 100%;
-}
-
-.title {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #333;
-}
-
-.input-field {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-
-.message {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 1rem;
-  color: green;
-}
-</style>
