@@ -10,8 +10,21 @@ const username = ref('');
 const email = ref('');
 const password = ref('');
 const message = ref('');
+const form = ref(null);
+
+// Validation rules
+const required = v => !!v || 'This field is required';
+const validEmail = v => /.+@.+\..+/.test(v) || 'E-mail must be valid';
 
 const signup = async () => {
+
+  const isValid = await form.value.validate();
+
+if (!isValid.valid) {
+  message.value = "Please fix the errors above.";
+  return;
+}
+
   try {
     await axios.post('http://localhost/api/auth/signup', {
       name: name.value,
@@ -52,14 +65,14 @@ const signup = async () => {
           label="Name"
           prepend-inner-icon="mdi-account-outline"
           variant="outlined"
-          required
+          :rules="[required]"
         />
         <v-text-field
           v-model="username"
           label="Username"
           prepend-inner-icon="mdi-account"
           variant="outlined"
-          required
+          :rules="[required]"
         />
         <v-text-field
           v-model="email"
@@ -67,7 +80,7 @@ const signup = async () => {
           prepend-inner-icon="mdi-email"
           variant="outlined"
           type="email"
-          required
+          :rules="[required]"
         />
         <v-text-field
           v-model="password"
@@ -75,7 +88,7 @@ const signup = async () => {
           prepend-inner-icon="mdi-lock"
           variant="outlined"
           type="password"
-          required
+          :rules="[required]"
         />
 
         <v-btn

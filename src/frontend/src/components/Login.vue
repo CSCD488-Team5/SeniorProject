@@ -8,8 +8,19 @@ const router = useRouter();
 const username = ref('');
 const password = ref('');
 const message = ref('');
+const form = ref(null);
+
+// Validation rules
+const required = (v) => !!v || 'This field is required';
 
 const login = async () => {
+  const isValid = await form.value.validate();
+
+  if (!isValid.valid) {
+    message.value = "Please fill in all required fields.";
+    return;
+  }
+
   try {
     const response = await axios.post('http://localhost/api/auth/login', {
       username: username.value,
@@ -37,7 +48,7 @@ const login = async () => {
           label="Username"
           prepend-inner-icon="mdi-account"
           variant="outlined"
-          required
+          :rules="[required]"
         />
 
         <v-text-field
@@ -46,7 +57,7 @@ const login = async () => {
           prepend-inner-icon="mdi-lock"
           variant="outlined"
           type="password"
-          required
+          :rules="[required]"
         />
 
         <v-btn
