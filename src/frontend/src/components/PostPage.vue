@@ -58,14 +58,51 @@
       </v-alert>
 
       <v-row v-else justify="center" align="stretch" class="post-grid">
-        <v-col v-for="post in posts" :key="post.id" cols="12" sm="6" md="4" lg="3">
-          <EventCard
-            :id="post.id"
-            :title="post.title"
-            :subtitle="post.subtitle"
-            :imageSrc="post.imageBase64"
-          />
+        <v-col
+            v-for="post in posts"
+            :key="post.id"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="3"
+        >
+          <v-hover v-slot="{ isHovering, props }">
+            <v-card
+                class="mx-auto"
+                max-width="344"
+                v-bind="props"
+            >
+              <v-img
+                  :src="`data:image/jpeg;base64,${post.imageBase64}`"
+                  height="200"
+                  cover
+              />
+
+              <v-card-text>
+                <h2 class="text-h6 text-primary">{{ post.title }}</h2>
+                {{ post.subtitle }}
+              </v-card-text>
+
+              <v-overlay
+                  :model-value="isHovering"
+                  class="align-center justify-center"
+                  scrim="rgba(0, 0, 0, 0.5)"
+                  contained
+                  style="border-radius: 12px;"
+              >
+                <div class="d-flex gap-4">
+                  <v-btn icon color="orange" @click.stop="handleEdit(post)">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn icon color="red" @click.stop="handleDelete(post.id)">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </div>
+              </v-overlay>
+            </v-card>
+          </v-hover>
         </v-col>
+
       </v-row>
     </div>
   </div>
@@ -73,7 +110,10 @@
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, watch } from "vue";
-import EventCard from "@/components/EventCard.vue"; // Adjust path if needed
+import EventCard from "@/components/EventCard.vue";
+import TokenService from "@/scripts/TokenService.js";
+import tokenService from "@/scripts/TokenService.js"; // Adjust path if needed
+import {getUsernameFromToken} from "@/utils/jwt.js";
 
 const postForm = ref(null);
 const requiredRule = value => !!value || 'This field is required';
@@ -84,6 +124,7 @@ const posts = ref([]);
 const showModal = ref(false);
 const dateMenu = ref(false);
 const timeMenu = ref(false);
+const hoveredPost = ref(null);
 const form = ref({
   title: "",
   subtitle: "",
@@ -102,8 +143,9 @@ const axios = appContext.config.globalProperties.$http;
 
 // Fetch posts from the backend when the component is mounted
 onMounted(async () => {
+  const username = getUsernameFromToken();
   try {
-    const response = await axios.get("http://localhost/api/PostPageController/2");
+    const response = await axios.get(`http://localhost/api/PostPageController/${username}`);
     posts.value = response.data;
   } catch (err) {
     console.error("Error fetching posts:", err);
@@ -112,8 +154,7 @@ onMounted(async () => {
 
 // Handle form submission for creating a post
 const submitPost = async () => {
-  const userId = 2;
-
+  const username = getUsernameFromToken();
   // Fields validation
   const { valid } = await postForm.value.validate();
   if (!valid) {
@@ -143,7 +184,7 @@ const submitPost = async () => {
       location: form.value.location,
       time: dateTime,
       imageBase64: form.value.imageBase64,
-      user: { id: userId },
+      user: { username: username },
     };
     await axios.post("http://localhost/api/PostPageController/createPost", postData);
     showModal.value = false;
