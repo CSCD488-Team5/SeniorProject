@@ -145,7 +145,7 @@ const axios = appContext.config.globalProperties.$http;
 onMounted(async () => {
   const username = getUsernameFromToken();
   try {
-    const response = await axios.get(`http://localhost/api/PostPageController/${username}`);
+    const response = await axios.get(`http://localhost/api/events/user/${username}`);
     posts.value = response.data;
   } catch (err) {
     console.error("Error fetching posts:", err);
@@ -155,46 +155,40 @@ onMounted(async () => {
 // Handle form submission for creating a post
 const submitPost = async () => {
   const username = getUsernameFromToken();
-  // Fields validation
   const { valid } = await postForm.value.validate();
-  if (!valid) {
-    // alert("Please fill out all required fields.");
-    return;
-  }
+  if (!valid) return;
+  if (!form.value.date || !form.value.time) return;
 
-  // Date/time validation
-  if (!form.value.date || !form.value.time) {
-    // alert("Date and Time are required.")
-    return;
-  }
-  
+  const toIsoString = (date, time) => {
+    const yyyyMMdd = new Date(date).toISOString().split("T")[0];
+    return `${yyyyMMdd}T${time}`;
+  };
+  const dateTime = toIsoString(form.value.date, form.value.time);
+
+  const formData = new FormData();
+  formData.append("title", form.value.title);
+  formData.append("subtitle", form.value.subtitle);
+  formData.append("description", form.value.description);
+  formData.append("category", form.value.category);
+  formData.append("location", form.value.location);
+  formData.append("time", dateTime);
+  formData.append("username", username);
+  formData.append("image", form.value.image); // ✅ Send the actual file here
+
   try {
-    const toIsoString = (date, time) => {
-      const yyyyMMdd = new Date(date).toISOString().split("T")[0];
-      return `${yyyyMMdd}T${time}`;
-    };
-
-    const dateTime = toIsoString(form.value.date, form.value.time);
-
-    const postData = {
-      title: form.value.title,
-      subtitle: form.value.subtitle,
-      description: form.value.description,
-      category: form.value.category,
-      location: form.value.location,
-      time: dateTime,
-      imageBase64: form.value.imageUrl,
-      user: { username: username },
-    };
-    await axios.post("http://localhost/api/PostPageController/createPost", postData);
+    const response = await axios.post("http://localhost/api/events/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
     showModal.value = false;
-    posts.value.push(postData);
   } catch (error) {
     console.error("Error creating post:", error);
     alert("Post was not created");
   }
 };
 
+/*
 const onImageSelected = (files) => {
   const file = Array.isArray(files) ? files[0] : files;
   if (!file) return;
@@ -206,7 +200,9 @@ const onImageSelected = (files) => {
   };
   reader.readAsDataURL(file);
 };
+*/
 
+/*
 watch(() => form.value.image, (file) => {
   if (!file) return;
 
@@ -217,4 +213,5 @@ watch(() => form.value.image, (file) => {
   };
   reader.readAsDataURL(file);
 });
+*/
 </script>
