@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,6 +23,8 @@ import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController
@@ -99,6 +102,52 @@ public class EventController {
         return eventRepository.findByUser_Username(username);
     }
 
+    @PutMapping("update/{id}")
+    public ResponseEntity<?> updateEvent(@PathVariable long id,
+    @RequestParam("title") String title,
+    @RequestParam("subtitle") String subtitle,
+    @RequestParam("category") String category,
+    @RequestParam("description") String description,
+    @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
+    @RequestParam("location") String location,
+    @RequestParam("image") MultipartFile imageFile,
+    @RequestParam("username") String username) 
+    {
+        Event event = eventRepository.findById(id)
+    .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
+
+        User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new RuntimeException("User was not found!"));
+        try {
+        // Step 1: Save image to /static/images/events/
+        String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+        java.nio.file.Path filePath = java.nio.file.Paths.get(UPLOAD_DIR, filename);
+        java.nio.file.Files.createDirectories(filePath.getParent());
+        java.nio.file.Files.write(filePath, imageFile.getBytes());
+
+        // Step 2: Build relative URL for serving
+        String imageUrl = "/images/events/" + filename;
+
+        event.setTitle(title);
+        event.setSubtitle(subtitle);
+        event.setCategory(category);
+        event.setDescription(description);
+        event.setTime(LocalDateTime.parse(time));
+        event.setLocation(location);
+        event.setImageUrl(imageUrl);
+        event.setUser(user);
+
+        Event updatedEvent = eventRepository.save(event);
+
+        return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+
+
+        } catch(IOException e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+    
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         if(!eventRepository.existsById(id)){
