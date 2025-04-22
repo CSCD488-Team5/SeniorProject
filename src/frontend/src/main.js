@@ -8,7 +8,7 @@ import  { isTokenValid } from "./utils/jwt.js";
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
     // Only add token for non-/api/auth/ requests
-    if (token && isTokenValid() && !config.url.includes('/api/auth/')) {
+    if (token && isTokenValid() && !config.url.includes('/api/auth/login') && !config.url.includes('/api/auth/signup')) {
         config.headers.Authorization = `Bearer ${token}`;
         console.log('Adding token to:', config.url); // Debug
     } else if (token && !isTokenValid()) {
@@ -28,9 +28,19 @@ import 'vuetify/styles'
 import { createVuetify } from "vuetify";
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import DayJsAdapter from '@date-io/dayjs'
+import { VTimePicker } from 'vuetify/labs/VTimePicker'
+
+
 
 const vuetify = createVuetify({
-    components,
+    date: {
+        adapter: DayJsAdapter,
+    },
+    components: {
+        ...components,
+        VTimePicker,
+    },
     directives,
 })
 

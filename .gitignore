@@ -46,3 +46,4 @@ coverage
 target/
 .DS_Store
 src/frontend/node/npm
+src/main/resources/static

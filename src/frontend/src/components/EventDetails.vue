@@ -3,7 +3,7 @@
     <div v-if="eventData">
       <!-- Display the event image if available -->
       <v-img
-        v-if="eventData.imageBase64"
+        v-if="eventData.imageUrl"
         :src="formattedImageSrc"
         height="300px"
         cover
@@ -47,12 +47,11 @@ onMounted(async () => {
 
 // Computed property to format the Base64 image data as a data URI
 const formattedImageSrc = computed(() => {
-  if (eventData.value && eventData.value.imageBase64) {
-    // If the image data doesn't already start with 'data:', prepend the Base64 prefix.
-    return eventData.value.imageBase64.startsWith('data:')
-      ? eventData.value.imageBase64
-      : `data:image/jpeg;base64,${eventData.value.imageBase64}`
+  if (eventData.value && eventData.value.imageUrl) {
+    return eventData.value.imageUrl.startsWith('http')
+      ? eventData.value.imageUrl
+      : `http://localhost:80${eventData.value.imageUrl}`;
   }
-  return ''
-})
+  return '';
+});
 </script>

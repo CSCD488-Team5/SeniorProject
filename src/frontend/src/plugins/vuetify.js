@@ -1,8 +1,12 @@
 import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
 import { createVuetify } from 'vuetify'
+import { VTimePicker } from 'vuetify/labs/VTimePicker'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
 export default createVuetify({
+  components: {
+    VTimePicker,
+  },
   theme: {
     defaultTheme: 'light', // You can set 'dark' to start in dark mode
     themes: {

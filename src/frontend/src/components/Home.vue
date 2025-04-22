@@ -6,7 +6,7 @@
         <div class="card-wrapper">
           <EventCard 
             :id="event.id"
-            :imageSrc="event.imageBase64" 
+            :imageSrc="event.imageUrl" 
             :title="event.title" 
             :subtitle="event.subtitle"
             :content="event.content" 
