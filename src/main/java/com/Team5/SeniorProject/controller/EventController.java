@@ -90,5 +90,10 @@ public class EventController {
                 .map(event -> new ResponseEntity<>(event, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-
+    //EndPoint: Find events by username.
+    @GetMapping("/user/{username}")
+    public List<Event> getEventByUsername(@PathVariable String username){
+        return eventRepository.findByUser_Username(username);
+    }
+    
 }
