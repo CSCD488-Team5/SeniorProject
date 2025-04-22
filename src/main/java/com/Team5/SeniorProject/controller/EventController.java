@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.Team5.SeniorProject.model.Event;
+import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
+import com.Team5.SeniorProject.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/events")
@@ -28,6 +30,8 @@ public class EventController {
 	
 	@Autowired
 	private EventRepository eventRepository;
+    @Autowired
+    private UserRepository userRepository;
 
 	@GetMapping
 	public List<Event> getAllEvents() {
@@ -41,12 +45,16 @@ public class EventController {
             // Author cle
             @RequestParam("title") String title,
             @RequestParam("subtitle") String subtitle,
-            @RequestParam("content") String content,
+            @RequestParam("category") String category,
+            @RequestParam("description") String description,
             // DateTime
             @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
             @RequestParam("location") String location,
-            @RequestParam("image") MultipartFile imageFile) {
+            @RequestParam("image") MultipartFile imageFile,
+            @RequestParam("username") String username) {
         try {
+
+            User user = userRepository.findByUsername(username).orElseThrow(() ->  new RuntimeException("User was not found for upload!"));
 
             // Step 1: Save image to /static/images/events/
             String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
@@ -61,10 +69,13 @@ public class EventController {
             Event event = new Event();
             event.setTitle(title);
             event.setSubtitle(subtitle);
-            event.setDescription(content);
+            event.setCategory(category);
+            event.setDescription(description);
             event.setTime(LocalDateTime.parse(time));
             event.setLocation(location);
             event.setImageUrl(imageUrl);
+            event.setUser(user);
+            
             Event savedEvent = eventRepository.save(event);
             return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
         } catch (IOException e) {
