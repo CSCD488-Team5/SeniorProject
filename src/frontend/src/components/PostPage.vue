@@ -73,7 +73,7 @@
                 v-bind="props"
             >
               <v-img
-                  :src="`data:image/jpeg;base64,${post.imageBase64}`"
+                  :src="`http://localhost:80${post.imageUrl}`"
                   height="200"
                   cover
               />
@@ -134,7 +134,7 @@ const form = ref({
   date: "",
   time: "",
   image: null, // holds File object
-  imageBase64: "", // holds encoded string
+  imageUrl: "", // holds encoded string
 });
 
 // Axios setup
@@ -183,7 +183,7 @@ const submitPost = async () => {
       category: form.value.category,
       location: form.value.location,
       time: dateTime,
-      imageBase64: form.value.imageBase64,
+      imageBase64: form.value.imageUrl,
       user: { username: username },
     };
     await axios.post("http://localhost/api/PostPageController/createPost", postData);
@@ -212,7 +212,7 @@ watch(() => form.value.image, (file) => {
 
   const reader = new FileReader();
   reader.onload = () => {
-    form.value.imageBase64 = reader.result;
+    form.value.imageUrl = reader.result;
     console.log("✅ Encoded image:", reader.result.slice(0, 50), "...");
   };
   reader.readAsDataURL(file);
