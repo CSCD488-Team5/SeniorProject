@@ -5,7 +5,14 @@
 		<v-card-title class="title-wrap">{{ title }}</v-card-title>
 
 		<v-card-subtitle class="text-caption text-grey">
-			Posted by {{ username }} &mdash; {{ location }}
+			Posted by 
+			<router-link
+				:to="{ name: 'Profile', params: { username: username } }"
+				class="clickable-username"
+				>
+				@{{ username }}
+			</router-link>
+			&mdash; {{ location }}
 		</v-card-subtitle>
 
 		<v-card-actions>
@@ -75,6 +82,10 @@ const formattedDate = computed(() => {
 	const date = new Date(props.time)
 	return date.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })
 })
+
+function goToUserProfile() {
+  router.push({ name: 'Profile', params: { username: props.username } });
+}
 </script>
 
 <style scoped>
@@ -88,5 +99,13 @@ const formattedDate = computed(() => {
 	white-space: normal;
 	overflow: visible;
 	word-wrap: break-word;
+}
+
+.clickable-username {
+  color: #1976d2;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 </style>

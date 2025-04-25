@@ -4,7 +4,7 @@ import { ref } from "vue"
 import axios from "axios"
 import { useRouter } from "vue-router"
 
-defineProps({
+const props = defineProps({
   username: {
     type: String,
     default: "User"
@@ -56,7 +56,7 @@ const signOut = () => {
 
 // Profile logic
 const profile = () => {
-  router.push("/Profile")
+  router.push({ name: 'Profile', params: { username: props.username }})
 }
 </script>
 

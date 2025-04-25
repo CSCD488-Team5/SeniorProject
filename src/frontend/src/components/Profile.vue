@@ -2,6 +2,10 @@
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import { getUsernameFromToken } from '@/utils/jwt.js'
 import EventCard from './EventCard.vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const profileUsername = ref(route.params.username)
 
 const user = ref({
 	username: '',
@@ -13,16 +17,16 @@ const events = ref([])
 
 const profileImageUrl = ref('https://cdn-icons-png.flaticon.com/512/149/149071.png') // placeholder avatar
 
-const username = getUsernameFromToken()
+// const username = getUsernameFromToken()
 const { appContext } = getCurrentInstance()
 const axios = appContext.config.globalProperties.$http
 
 onMounted(async () => {
 	try {
-		// const userRes = await axios.get(`http://localhost/api/users/${username}`)
+		// const userRes = await axios.get(`http://localhost/api/users/${profileUsername.value}`)
 		// user.value = userRes.data
 
-		const eventRes = await axios.get(`http://localhost/api/events/user/${username}`)
+		const eventRes = await axios.get(`http://localhost/api/events/user/${profileUsername.value}`)
 		events.value = eventRes.data
 	} catch (err) {
 		console.error("Error loading profile:", err)
