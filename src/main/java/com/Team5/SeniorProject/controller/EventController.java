@@ -44,7 +44,6 @@ public class EventController {
             // Category
             // Author cle
             @RequestParam("title") String title,
-            @RequestParam("subtitle") String subtitle,
             @RequestParam("category") String category,
             @RequestParam("description") String description,
             // DateTime
@@ -68,7 +67,6 @@ public class EventController {
             // Step 3: Save event with imageUrl
             Event event = new Event();
             event.setTitle(title);
-            event.setSubtitle(subtitle);
             event.setCategory(category);
             event.setDescription(description);
             event.setTime(LocalDateTime.parse(time));

@@ -1,8 +1,12 @@
 <template>
 	<v-card class="mx-auto" fixed-width-card>
 		<v-img height="200px" :src="computedImageSrc" cover></v-img>
+
 		<v-card-title class="title-wrap">{{ title }}</v-card-title>
-		<v-card-subtitle>{{ subtitle }}</v-card-subtitle>
+
+		<v-card-subtitle class="text-caption text-grey">
+			Posted by {{ username }} &mdash; {{ location }}
+		</v-card-subtitle>
 
 		<v-card-actions>
 			<v-btn color="orange-darken-3" text variant="tonal" @click="goToEventDetails">Explore</v-btn>
@@ -16,7 +20,9 @@
 			<div v-show="show">
 				<v-divider></v-divider>
 				<v-card-text>
-					{{ content }}
+					<p><strong>Category: </strong> {{ category }}</p>
+					<p><strong>Time: </strong> {{  formattedTime }}</p>
+					<p>{{ description }}</p>
 				</v-card-text>
 			</div>
 		</v-expand-transition>
@@ -28,11 +34,14 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
-	imageSrc: { type: String, required: true },
-	title: { type: String, required: true },
-	subtitle: { type: String, required: true },
-	content: { type: String, required: true },
-	id: Number
+	id: Number,
+	title: String,
+	category: String,
+	description: String,
+	location: String,
+	time: String,
+	imageSrc: String,
+	username: String, // Creator of the post
 })
 
 const computedImageSrc = computed(() => {
@@ -54,7 +63,11 @@ function goToEventDetails() {
 	router.push({ name: 'EventDetails', params: { id: props.id } });
 }
 
-
+const formattedTime = computed( () => {
+	if (!props.time) return ''
+	const date = new Date(props.time)
+	return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+})
 </script>
 
 <style scoped>

@@ -65,10 +65,13 @@ onMounted(async () => {
 			>
 				<EventCard
 				:id="event.id"
-				:imageSrc="event.imageUrl"
 				:title="event.title"
-				:subtitle="event.subtitle"
-				:content="event.content"></EventCard>
+				:category="event.category"
+				:description="event.description"
+				:location="event.location"
+				:time="event.time"
+				:imageSrc="event.imageUrl"
+				:username="event.user.username"></EventCard>
 			</v-col>
 		</v-row>
 	</v-container>
