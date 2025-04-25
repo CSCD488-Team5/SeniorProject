@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import { getUsernameFromToken } from '@/utils/jwt.js'
+import EventCard from './EventCard.vue'
 
 const user = ref({
 	username: '',
@@ -18,8 +19,8 @@ const axios = appContext.config.globalProperties.$http
 
 onMounted(async () => {
 	try {
-		const userRes = await axios.get(`http://localhost/api/users/${username}`)
-		user.value = userRes.data
+		// const userRes = await axios.get(`http://localhost/api/users/${username}`)
+		// user.value = userRes.data
 
 		const eventRes = await axios.get(`http://localhost/api/events/user/${username}`)
 		events.value = eventRes.data
@@ -34,35 +35,54 @@ onMounted(async () => {
 
 <template>
 	<v-container class="mt-10">
-	  <v-card class="mx-auto" max-width="600">
-		<v-card-title>
-		  <v-avatar size="56" class="mr-3">
-			<v-img :src="profileImageUrl" alt="Profile" />
-		  </v-avatar>
-		  <div>
-			<h3 class="text-h6">{{ user.username }}</h3>
-			<p class="text-subtitle-2">{{ user.email }}</p>
-		  </div>
-		</v-card-title>
-  
-		<v-card-text>
-		  <p><strong>Joined:</strong> {{ user.createdAt }}</p>
-		  <p><strong>Total Events:</strong> {{ events.length }}</p>
-		</v-card-text>
-  
-		<v-divider class="my-4"></v-divider>
-  
-		<v-card-text>
-		  <h4 class="text-subtitle-1 mb-2">My Events</h4>
-		  <v-list>
-			<v-list-item v-for="event in events" :key="event.id">
-			  <v-list-item-content>
-				<v-list-item-title>{{ event.title }}</v-list-item-title>
-				<v-list-item-subtitle>{{ event.subtitle }}</v-list-item-subtitle>
-			  </v-list-item-content>
-			</v-list-item>
-		  </v-list>
-		</v-card-text>
-	  </v-card>
+		<v-card class="mx-auto" max-width="1000">
+			<v-card-title>
+				<v-avatar size="56" class="mr-3">
+					<v-img :src="profileImageUrl" alt="Profile" />
+				</v-avatar>
+				<div>
+					<h3 class="text-h6">{{ user.username }}</h3>
+					<p class="text-subtitle-2">{{ user.email }}</p>
+				</div>
+			</v-card-title>
+
+			<v-card-text>
+				<p><strong>Joined:</strong> {{ user.createdAt }}</p>
+				<p><strong>Total Events:</strong> {{ events.length }}</p>
+			</v-card-text>
+		</v-card>
 	</v-container>
-  </template>
+
+	<v-container class="mt-6" fluid>
+		<v-row justify="center" align="stretch">
+			<v-col
+				v-for="event in events"
+				:key="event.id"
+				cols="12"
+				sm="6"
+				md="4"
+				lg="3"
+			>
+				<EventCard
+				:id="event.id"
+				:imageSrc="event.imageUrl"
+				:title="event.title"
+				:subtitle="event.subtitle"
+				:content="event.content"></EventCard>
+			</v-col>
+		</v-row>
+	</v-container>
+</template>
+
+<style scoped>
+
+/* This wrapper forces each card to a fixed width and adds spacing between them */
+.card-wrapper
+{
+  width: 300px;
+  /* Set the desired fixed width for each card */
+  margin-right: 16px;
+  /* Space between cards */
+  padding: 10px;
+}
+</style>
