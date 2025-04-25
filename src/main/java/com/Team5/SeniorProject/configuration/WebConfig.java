@@ -11,6 +11,8 @@ public class WebConfig implements WebMvcConfigurer {
 		// Allow CORS for static images
 		registry.addMapping("/images/**")
 			.allowedOrigins("http://localhost:5173")
-			.allowedMethods("GET");
+			.allowedMethods("GET")
+			.allowedHeaders("*")
+			.allowCredentials(true);
 	}
 }
