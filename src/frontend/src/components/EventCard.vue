@@ -21,6 +21,7 @@
 				<v-divider></v-divider>
 				<v-card-text>
 					<p><strong>Category: </strong> {{ category }}</p>
+					<p><strong>Date:</strong> {{ formattedDate }}</p>
 					<p><strong>Time: </strong> {{  formattedTime }}</p>
 					<p>{{ description }}</p>
 				</v-card-text>
@@ -66,7 +67,13 @@ function goToEventDetails() {
 const formattedTime = computed( () => {
 	if (!props.time) return ''
 	const date = new Date(props.time)
-	return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+	return date.toLocaleTimeString([], {  hour: '2-digit', minute: '2-digit' })
+})
+
+const formattedDate = computed(() => {
+	if (!props.time) return ''
+	const date = new Date(props.time)
+	return date.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })
 })
 </script>
 
