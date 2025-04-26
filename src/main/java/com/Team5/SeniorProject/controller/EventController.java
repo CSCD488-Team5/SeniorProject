@@ -102,6 +102,7 @@ public class EventController {
         return eventRepository.findByUser_Username(username);
     }
 
+    //EndPoint: Updates the events
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable long id,
     @RequestParam("title") String title,

@@ -125,6 +125,8 @@ const showModal = ref(false);
 const dateMenu = ref(false);
 const timeMenu = ref(false);
 const hoveredPost = ref(null);
+const isEditing = ref(false);
+const selectedPostId = ref(null);
 const form = ref({
   title: "",
   subtitle: "",
@@ -179,12 +181,17 @@ const submitPost = async () => {
   formData.append("image", form.value.image); // ✅ Send the actual file here
 
   try {
-    const response = await axios.post("http://localhost/api/events/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
-    });
+
+    if(isEditing.value && selectedPostId.value){
+      const response = await axios.put(`http://localhost/api/events/update/${selectedPostId.value}`, formData,);
+
+      }else {
+      const response = await axios.post("http://localhost/api/events/upload", formData,);
+    }
+    //Reset states and refresh
     showModal.value = false;
+    isEditing.value = false;
+    selectedPostId.value = null;
     await fetchPosts();//Remounts the page
   } catch (error) {
     console.error("Error creating post:", error);
@@ -202,6 +209,30 @@ const handleDelete = async (postId) => {
   }
 };
 
+const handleEdit = (post) => {
+  // 1) toggle into edit mode
+  isEditing.value = true
+  selectedPostId.value = post.id
+
+  // 2) pre-fill the form
+  form.value.title       = post.title
+  form.value.subtitle    = post.subtitle
+  form.value.description = post.description
+  form.value.category    = post.category
+  form.value.location    = post.location
+
+  // split ISO timestamp into date + time
+  const [date, time] = post.time.split("T")
+  form.value.date = date
+  form.value.time = time.slice(0,5)
+
+  // keep existing image
+  form.value.image    = null
+  form.value.imageUrl = post.imageUrl
+
+  // 3) open the modal
+  showModal.value = true
+};
 /*
 const onImageSelected = (files) => {
   const file = Array.isArray(files) ? files[0] : files;
