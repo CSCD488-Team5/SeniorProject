@@ -25,7 +25,6 @@ public class Event {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String title;
-	private String subtitle;
 	private String category;
 	private String description;
 	private LocalDateTime time;

@@ -47,7 +47,6 @@ public class EventController {
             // Category
             // Author cle
             @RequestParam("title") String title,
-            @RequestParam("subtitle") String subtitle,
             @RequestParam("category") String category,
             @RequestParam("description") String description,
             // DateTime
@@ -71,7 +70,6 @@ public class EventController {
             // Step 3: Save event with imageUrl
             Event event = new Event();
             event.setTitle(title);
-            event.setSubtitle(subtitle);
             event.setCategory(category);
             event.setDescription(description);
             event.setTime(LocalDateTime.parse(time));
@@ -95,8 +93,12 @@ public class EventController {
     }
     //EndPoint: Find events by username.
     @GetMapping("/user/{username}")
-    public List<Event> getEventByUsername(@PathVariable String username){
-        return eventRepository.findByUser_Username(username);
+    public ResponseEntity<List<Event>> getEventByUsername(@PathVariable String username){
+        List<Event> events = eventRepository.findByUser_Username(username);
+        if (events.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")

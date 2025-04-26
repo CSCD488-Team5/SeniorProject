@@ -9,11 +9,16 @@
         cover
       ></v-img>
       <h1>{{ eventData.title }}</h1>
-      <p><strong>Subtitle:</strong> {{ eventData.subtitle }}</p>
-      <p><strong>Content:</strong> {{ eventData.content }}</p>
-      <p><strong>Time:</strong> {{ eventData.time }}</p>
+
+      <v-chip color="primary" class="ma-2" v-if="eventData.category">
+        {{  eventData.category }}
+      </v-chip>
+
+      <p><strong>Created By:</strong> {{  eventData.user.username }}</p>
+      <p><strong>Description:</strong> {{ eventData.description }}</p>
       <p><strong>Location:</strong> {{ eventData.location }}</p>
-      <!-- Add any other details you need -->
+      <p><strong>Date:</strong> {{ formattedDate }}</p>
+      <p><strong>Time:</strong> {{ formattedTime }}</p>
     </div>
     <div v-else>
       <p>Loading event details...</p>
@@ -54,4 +59,16 @@ const formattedImageSrc = computed(() => {
   }
   return '';
 });
+
+const formattedDate = computed(() => {
+  if (!eventData.value || !eventData.value.time) return ''
+  const date = new Date(eventData.value.time)
+  return date.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })
+})
+
+const formattedTime = computed( () => {
+	if (!eventData.value || !eventData.value.time) return ''
+  const date = new Date(eventData.value.time)
+	return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+})
 </script>
