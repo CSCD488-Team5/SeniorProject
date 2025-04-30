@@ -32,4 +32,8 @@ public class FollowService {
 		followRepository.deleteByFollower_IdAndFollowee_Id(followerId, followeeId);
 	}
 
+	public boolean isFollowing(Long followerId, Long followeeId) {
+		return followRepository.findByFollower_IdAndFollowee_Id(followerId, followeeId).isPresent();
+	}
+
 }

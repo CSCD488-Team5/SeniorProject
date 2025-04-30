@@ -3,6 +3,7 @@ package com.Team5.SeniorProject.controller;
 import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,5 +36,11 @@ public class FollowController {
 		Long me = userRepository.findByUsername(principal.getName()).orElseThrow().getId();
 		followService.unfollow(me, id);
 		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/{id}/is-following")
+	public boolean isFollowing(@PathVariable Long id, Principal principal) {
+		Long me = userRepository.findByUsername(principal.getName()).orElseThrow().getId();
+		return followService.isFollowing(me, id);
 	}
 }
