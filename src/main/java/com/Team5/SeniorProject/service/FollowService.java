@@ -27,4 +27,9 @@ public class FollowService {
 		}
 	}
 
+	@Transactional
+	public void unfollow(Long followerId, Long followeeId) {
+		followRepository.deleteByFollower_IdAndFollowee_Id(followerId, followeeId);
+	}
+
 }

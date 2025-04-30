@@ -29,4 +29,11 @@ public class FollowController {
 		followService.follow(me, id);
 		return ResponseEntity.ok().build();
 	}
+
+	@PostMapping("/{id}/unfollow") 
+	public ResponseEntity<Void> unfollow(@PathVariable Long id, Principal principal) {
+		Long me = userRepository.findByUsername(principal.getName()).orElseThrow().getId();
+		followService.unfollow(me, id);
+		return ResponseEntity.noContent().build();
+	}
 }
