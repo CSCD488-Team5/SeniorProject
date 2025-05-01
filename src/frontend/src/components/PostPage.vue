@@ -73,9 +73,10 @@
                 v-bind="props"
             >
               <v-img
-                  :src="`http://localhost:80${post.imageUrl}`"
+                  :src="getImageUrl(post)"
                   height="200"
                   cover
+                  @error="retryImage(post)"
               />
 
               <v-card-text>
@@ -125,6 +126,8 @@ const showModal = ref(false);
 const dateMenu = ref(false);
 const timeMenu = ref(false);
 const hoveredPost = ref(null);
+const isEditing = ref(false);
+const selectedPostId = ref(null);
 const form = ref({
   title: "",
   subtitle: "",
@@ -137,6 +140,17 @@ const form = ref({
   imageUrl: "", // holds encoded string
 });
 
+const getImageUrl = (post) => {
+  return `http://localhost:80${post.imageUrl}?t=${post.retryKey || ''}`;
+};
+
+const retryImage = (post) => {
+  setTimeout(() => {
+    post.retryKey = Date.now();
+  }, 500); // retry after 0.5s
+};
+
+
 // Axios setup
 const { appContext } = getCurrentInstance();
 const axios = appContext.config.globalProperties.$http;
@@ -146,7 +160,11 @@ const fetchPosts = async () => {
   const username = getUsernameFromToken();
   try {
     const response = await axios.get(`http://localhost/api/events/user/${username}`);
-    posts.value = response.data;
+    posts.value = response.data.map(post => ({
+  ...post,
+  retryKey: null
+}));
+
   } catch (err) {
     console.error("Error fetching posts:", err);
   }
@@ -176,16 +194,27 @@ const submitPost = async () => {
   formData.append("location", form.value.location);
   formData.append("time", dateTime);
   formData.append("username", username);
-  formData.append("image", form.value.image); // ✅ Send the actual file here
+ //This statement is for the editing post
+  if(form.value.image){
+    formData.append("image", form.value.image);
+  }
 
   try {
-    const response = await axios.post("http://localhost/api/events/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
-    });
+
+    if(isEditing.value && selectedPostId.value){
+      const response = await axios.put(`http://localhost/api/events/update/${selectedPostId.value}`, formData,);
+
+      }else {
+      const response = await axios.post("http://localhost/api/events/upload", formData,);
+    }
+    //Reset states and refresh
     showModal.value = false;
-    await fetchPosts();//Remounts the page
+    isEditing.value = false;
+    selectedPostId.value = null;
+    setTimeout(async () => {
+    await fetchPosts();
+}, 500); // give backend time to save the image
+
   } catch (error) {
     console.error("Error creating post:", error);
     alert("Post was not created");
@@ -202,6 +231,30 @@ const handleDelete = async (postId) => {
   }
 };
 
+const handleEdit = (post) => {
+  // 1) toggle into edit mode
+  isEditing.value = true
+  selectedPostId.value = post.id
+
+  // 2) pre-fill the form
+  form.value.title       = post.title
+  form.value.subtitle    = post.subtitle
+  form.value.description = post.description
+  form.value.category    = post.category
+  form.value.location    = post.location
+
+  // split ISO timestamp into date + time
+  const [date, time] = post.time.split("T")
+  form.value.date = date
+  form.value.time = time.slice(0,5)
+
+  // keep existing image
+  form.value.image    = null
+  form.value.imageUrl = post.imageUrl
+
+  // 3) open the modal
+  showModal.value = true
+};
 /*
 const onImageSelected = (files) => {
   const file = Array.isArray(files) ? files[0] : files;
