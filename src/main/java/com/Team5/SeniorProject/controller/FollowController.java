@@ -4,6 +4,8 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,7 @@ import com.Team5.SeniorProject.service.FollowService;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "http://localhost:5173")
 public class FollowController {
 	
 	private final FollowService followService;
@@ -33,7 +36,7 @@ public class FollowController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PostMapping("/{id}/unfollow") 
+	@DeleteMapping("/{id}/unfollow") 
 	public ResponseEntity<Void> unfollow(@PathVariable Long id, Principal principal) {
 		Long me = userRepository.findByUsername(principal.getName()).orElseThrow().getId();
 		followService.unfollow(me, id);

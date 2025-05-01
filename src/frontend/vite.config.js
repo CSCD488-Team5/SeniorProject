@@ -10,13 +10,13 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
-  devServer:{
-    port: 8081,
+  server:{
+    port: 5173,
     proxy: {
       '/api': {
         target: 'http://localhost:80',
-        ws: true,
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false
       }
     }
   },

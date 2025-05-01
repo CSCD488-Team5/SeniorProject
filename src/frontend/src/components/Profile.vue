@@ -3,6 +3,8 @@ import { ref, onMounted, getCurrentInstance } from 'vue'
 import { getUsernameFromToken } from '@/utils/jwt.js'
 import EventCard from './EventCard.vue'
 import { useRoute } from 'vue-router'
+import FollowButton from './FollowButton.vue'
+
 
 const route = useRoute()
 const profileUsername = ref(route.params.username)
@@ -23,8 +25,8 @@ const axios = appContext.config.globalProperties.$http
 
 onMounted(async () => {
 	try {
-		// const userRes = await axios.get(`http://localhost/api/users/${profileUsername.value}`)
-		// user.value = userRes.data
+		const userRes = await axios.get(`http://localhost/api/users/${profileUsername.value}`)
+		user.value = userRes.data
 
 		const eventRes = await axios.get(`http://localhost/api/events/user/${profileUsername.value}`)
 		events.value = eventRes.data
@@ -33,7 +35,7 @@ onMounted(async () => {
 	}
 })
 
-
+const currentUsername = getUsernameFromToken()
 
 </script>
 
@@ -54,6 +56,14 @@ onMounted(async () => {
 				<p><strong>Joined:</strong> {{ user.createdAt }}</p>
 				<p><strong>Total Events:</strong> {{ events.length }}</p>
 			</v-card-text>
+
+			<v-card-actions>
+				<FollowButton
+				v-if="user.username && user.username !== currentUsername"
+				:profileUserId="user.id">
+				</FollowButton>
+			</v-card-actions>
+			
 		</v-card>
 	</v-container>
 
