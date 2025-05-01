@@ -111,7 +111,7 @@ public class EventController {
     @RequestParam("description") String description,
     @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
     @RequestParam("location") String location,
-    @RequestParam("image") MultipartFile imageFile,
+    @RequestParam(value = "image", required = false) MultipartFile imageFile,
     @RequestParam("username") String username) 
     {
         Event event = eventRepository.findById(id)
@@ -119,6 +119,17 @@ public class EventController {
 
         User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new RuntimeException("User was not found!"));
+
+        //Set all attributes of the event, except Image
+        event.setTitle(title);
+        event.setSubtitle(subtitle);
+        event.setCategory(category);
+        event.setDescription(description);
+        event.setTime(LocalDateTime.parse(time));
+        event.setLocation(location);
+        event.setUser(user);
+
+        if(imageFile!= null && !imageFile.isEmpty()){
         try {
         // Step 1: Save image to /static/images/events/
         String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
@@ -129,23 +140,14 @@ public class EventController {
         // Step 2: Build relative URL for serving
         String imageUrl = "/images/events/" + filename;
 
-        event.setTitle(title);
-        event.setSubtitle(subtitle);
-        event.setCategory(category);
-        event.setDescription(description);
-        event.setTime(LocalDateTime.parse(time));
-        event.setLocation(location);
         event.setImageUrl(imageUrl);
-        event.setUser(user);
-
-        Event updatedEvent = eventRepository.save(event);
-
-        return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
-
 
         } catch(IOException e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    Event updatedEvent = eventRepository.save(event);
+    return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
 
     }
     

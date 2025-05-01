@@ -178,7 +178,10 @@ const submitPost = async () => {
   formData.append("location", form.value.location);
   formData.append("time", dateTime);
   formData.append("username", username);
-  formData.append("image", form.value.image); // ✅ Send the actual file here
+ //This statement is for the editing post
+  if(form.value.image){
+    formData.append("image", form.value.image);
+  }
 
   try {
 
