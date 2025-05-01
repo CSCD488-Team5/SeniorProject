@@ -43,4 +43,9 @@ public class FollowService {
 				.map(Follow::getFollower).toList();
 	}
 
+	public List<User> listFollowing(Long userId) {
+		return followRepository.findByFollower_Id(userId).stream()
+				.map(Follow::getFollowee).toList();
+	}
+
 }

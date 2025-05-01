@@ -50,4 +50,9 @@ public class FollowController {
 	public List<User> getFollowers(@PathVariable Long id) {
 		return followService.listFollowers(id);
 	}
+
+	@GetMapping("/{id}/following")
+	public List<User> getFollowing(@PathVariable Long id) {
+		return followService.listFollowing(id);
+	}
 }
