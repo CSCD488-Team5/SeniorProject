@@ -22,6 +22,7 @@ import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.Team5.SeniorProject.service.EmailService;
 
 
 @RestController
@@ -35,6 +36,9 @@ public class EventController {
 	private EventRepository eventRepository;
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
 	@GetMapping
 	public List<Event> getAllEvents() {
@@ -104,12 +108,21 @@ public class EventController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         if(!eventRepository.existsById(id)){
-            return ResponseEntity.noContent().build();//If event does not exist.
+            return ResponseEntity.noContent().build(); //If event does not exist.
         }
+        Event event = eventRepository.findById(id).orElse(null);
+        if (event.getUser() != null) {
+            User user = event.getUser();
+            String title = event.getTitle();
+            eventRepository.deleteById(id);
+            emailService.sendEventDeletionEmail(user, title);
+            }
 
-        eventRepository.deleteById(id);
         return ResponseEntity.noContent().build();// Deletes the event.
     }
+
     
     
+    
+
 }
