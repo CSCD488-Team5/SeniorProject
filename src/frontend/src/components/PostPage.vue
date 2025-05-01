@@ -73,9 +73,10 @@
                 v-bind="props"
             >
               <v-img
-                  :src="`http://localhost:80${post.imageUrl}`"
+                  :src="getImageUrl(post)"
                   height="200"
                   cover
+                  @error="retryImage(post)"
               />
 
               <v-card-text>
@@ -139,6 +140,17 @@ const form = ref({
   imageUrl: "", // holds encoded string
 });
 
+const getImageUrl = (post) => {
+  return `http://localhost:80${post.imageUrl}?t=${post.retryKey || ''}`;
+};
+
+const retryImage = (post) => {
+  setTimeout(() => {
+    post.retryKey = Date.now();
+  }, 500); // retry after 0.5s
+};
+
+
 // Axios setup
 const { appContext } = getCurrentInstance();
 const axios = appContext.config.globalProperties.$http;
@@ -148,7 +160,11 @@ const fetchPosts = async () => {
   const username = getUsernameFromToken();
   try {
     const response = await axios.get(`http://localhost/api/events/user/${username}`);
-    posts.value = response.data;
+    posts.value = response.data.map(post => ({
+  ...post,
+  retryKey: null
+}));
+
   } catch (err) {
     console.error("Error fetching posts:", err);
   }
@@ -195,7 +211,10 @@ const submitPost = async () => {
     showModal.value = false;
     isEditing.value = false;
     selectedPostId.value = null;
-    await fetchPosts();//Remounts the page
+    setTimeout(async () => {
+    await fetchPosts();
+}, 500); // give backend time to save the image
+
   } catch (error) {
     console.error("Error creating post:", error);
     alert("Post was not created");
