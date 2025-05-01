@@ -4,7 +4,7 @@ import { ref } from "vue"
 import axios from "axios"
 import { useRouter } from "vue-router"
 
-defineProps({
+const props = defineProps({
   username: {
     type: String,
     default: "User"
@@ -53,6 +53,11 @@ const signOut = () => {
   emit("logout")
   router.push("/Login")
 }
+
+// Profile logic
+const profile = () => {
+  router.push({ name: 'Profile', params: { username: props.username }})
+}
 </script>
 
 <template>
@@ -67,6 +72,9 @@ const signOut = () => {
     </template>
 
     <v-list>
+      <v-list-item @click="profile">
+        <v-list-item-title>Profile</v-list-item-title>
+      </v-list-item>
       <v-list-item @click="showPasswordDialog = true">
         <v-list-item-title>Change Password</v-list-item-title>
       </v-list-item>
@@ -83,18 +91,8 @@ const signOut = () => {
 
       <form @submit.prevent="submitChangePassword">
         <v-card-text>
-          <v-text-field
-              label="Current Password"
-              v-model="currentPassword"
-              type="password"
-              required
-          />
-          <v-text-field
-              label="New Password"
-              v-model="newPassword"
-              type="password"
-              required
-          />
+          <v-text-field label="Current Password" v-model="currentPassword" type="password" required />
+          <v-text-field label="New Password" v-model="newPassword" type="password" required />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
