@@ -1,5 +1,7 @@
 package com.Team5.SeniorProject.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,11 @@ public class FollowService {
 
 	public boolean isFollowing(Long followerId, Long followeeId) {
 		return followRepository.findByFollower_IdAndFollowee_Id(followerId, followeeId).isPresent();
+	}
+
+	public List<User> listFollowers(Long userId) {
+		return followRepository.findByFollowee_Id(userId).stream()
+				.map(Follow::getFollower).toList();
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.Team5.SeniorProject.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.FollowService;
 
@@ -42,5 +44,10 @@ public class FollowController {
 	public boolean isFollowing(@PathVariable Long id, Principal principal) {
 		Long me = userRepository.findByUsername(principal.getName()).orElseThrow().getId();
 		return followService.isFollowing(me, id);
+	}
+
+	@GetMapping("/{id}/followers")
+	public List<User> getFollowers(@PathVariable Long id) {
+		return followService.listFollowers(id);
 	}
 }
