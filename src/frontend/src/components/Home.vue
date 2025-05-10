@@ -9,7 +9,7 @@
     <!-- Upcoming Events -->
     <h2 class="mt-8">Upcoming Events</h2>
     <v-fade-transition>
-      <div v-if="loading">
+      <div v-if="upcomingLoading">
         <v-row>
           <v-col v-for="n in 3" :key="n">
             <v-skeleton-loader type="image, article" height="250" class="mb-4" />
@@ -28,7 +28,7 @@
 
     <!-- Fallback if empty events -->
     <v-fade-transition>
-      <v-alert v-if="events.length === 0 && !loading" type="info" variant="tonal" class="my-6" border="start">
+      <v-alert v-if="events.length === 0 && !upcomingLoading" type="info" variant="tonal" class="my-6" border="start">
         No upcoming events found. Try again later or check your followed events below.
       </v-alert>
     </v-fade-transition>
@@ -53,7 +53,7 @@
     <!-- Pagination -->
     <!-- Followed Events Grid or Skeleton Loader -->
     <v-fade-transition>
-      <v-row v-if="!loading">
+      <v-row v-if="!followedLoading">
         <v-col v-for="event in paginatedEvents" :key="event.id" cols="12" sm="6" md="4">
           <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
             :content="event.content" />
@@ -70,7 +70,7 @@
 
     <!-- Pagination Control -->
     <v-fade-transition>
-      <v-pagination v-if="!loading && totalPages > 1" v-model="currentPage" :length="totalPages"
+      <v-pagination v-if="!followedLoading && totalPages > 1" v-model="currentPage" :length="totalPages"
         class="my-4 d-flex justify-center" rounded color="primary" />
     </v-fade-transition>
 
@@ -250,10 +250,14 @@ const followedEvents = computed(() => {
 const { appContext } = getCurrentInstance();
 const axios = appContext.config.globalProperties.$http; // Uses token from main.js interceptor
 
-const loading = ref(false); // Loading state
+// const loading = ref(false); // Loading state
+const upcomingLoading = ref(false);
+const followedLoading = ref(false);
+
+
 
 onMounted(async () => {
-  loading.value = true;
+  upcomingLoading.value = true;
   try {
     // Fetch events from backend endpoint using axios now
     const response = await axios.get("http://localhost/api/events");
@@ -262,7 +266,7 @@ onMounted(async () => {
     console.error("Error loading events:", error);
     alert("You must be logged in to see events.");
   } finally {
-    loading.value = false; // Set loading to false after data is fetched
+    upcomingLoading.value = false; // Set loading to false after data is fetched
   }
 });
 
@@ -282,11 +286,11 @@ const totalPages = computed(() => {
 });
 
 watch(filterOption, async () => {
-  loading.value = true; // Set loading to true when filter changes
+  followedLoading.value = true; // Set loading to true when filter changes
   await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate loading delay
   selectedValue.value = null; // reset dropdown when switching filter type
   currentPage.value = 1; // reset pagination when switching filter type
-  loading.value = false; // Set loading to false after data is fetched
+  followedLoading.value = false; // Set loading to false after data is fetched
 });
 </script>
 
