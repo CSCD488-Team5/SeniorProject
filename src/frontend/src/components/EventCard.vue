@@ -6,6 +6,7 @@
 
 		<v-card-actions>
 			<v-btn color="orange-darken-3" text variant="tonal" @click="goToEventDetails">Explore</v-btn>
+			<v-btn color="green-darken-3" text variant="tonal" @click="joinEvent">Join</v-btn>
 			<v-spacer></v-spacer>
 			<v-btn icon @click="toggleContent">
 				<v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
