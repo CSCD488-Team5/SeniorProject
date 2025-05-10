@@ -15,6 +15,7 @@ const emit = defineEmits(["logout"])
 const router = useRouter()
 const menu = ref(false)
 const showPasswordDialog = ref(false)
+const showDeleteDialog = ref(false)
 const currentPassword = ref("")
 const newPassword = ref("")
 const snackbar = ref(false)
@@ -53,6 +54,33 @@ const signOut = () => {
   emit("logout")
   router.push("/Login")
 }
+
+// Delete Account Logic
+const deleteAccount = async () => {
+  try {
+    await axios.delete("http://localhost/api/auth/delete-account", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    })
+
+    snackbarMessage.value = "Account deleted. Goodbye!"
+    snackbar.value = true
+    showDeleteDialog.value = false
+
+    setTimeout(() => {
+      localStorage.removeItem("token")
+      window.dispatchEvent(new Event("user-logged-out"))
+      router.push("/Login")
+    }, 1000)
+  } catch (error) {
+    console.error("Delete account error:", error)
+    snackbarMessage.value = error.response?.data || "Failed to delete account"
+    snackbar.value = true
+  }
+}
+
+
 </script>
 
 <template>
@@ -69,6 +97,10 @@ const signOut = () => {
     <v-list>
       <v-list-item @click="showPasswordDialog = true">
         <v-list-item-title>Change Password</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item @click="showDeleteDialog = true">
+        <v-list-item-title>Delete Account</v-list-item-title>
       </v-list-item>
 
       <v-list-item @click="signOut">
@@ -104,6 +136,21 @@ const signOut = () => {
       </form>
     </v-card>
   </v-dialog>
+
+    <v-dialog v-model="showDeleteDialog" max-width="450">
+    <v-card>
+      <v-card-title class="text-h6">Confirm Account Deletion</v-card-title>
+      <v-card-text>
+        Are you sure you want to delete your account? This action cannot be undone.
+     </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn text @click="showDeleteDialog = false">Cancel</v-btn>
+        <v-btn color="red" @click="deleteAccount">Delete</v-btn>
+     </v-card-actions>
+    </v-card>
+  </v-dialog>
+
 
 
   <!-- alert message logic-->

@@ -1,6 +1,6 @@
 package com.Team5.SeniorProject.controller;
 
-
+import com.Team5.SeniorProject.service.UserService;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.model.PasswordChangeRequest;
 import com.Team5.SeniorProject.repository.UserRepository;
@@ -24,6 +24,9 @@ public class AccountChangesController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequest request, Principal principal) {
         String username = principal.getName(); //gets username from JWT
@@ -44,4 +47,16 @@ public class AccountChangesController {
 
         return ResponseEntity.ok("Password changed successfully");
     }
+
+
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<?> deleteAccount(Principal principal) {
+        String username = principal.getName();
+        userService.deleteUserByUsername(username);
+        return ResponseEntity.ok("Account deleted successfully");
+    }
+
+
+
+
 }
