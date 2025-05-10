@@ -1,16 +1,37 @@
 <template>
 
+  <v-sheet color="primary" class="pa-4 mb-6 text-white">
+    <h1 class="text-h4">Welcome to Campus Events</h1>
+    <p>Discover and follow events happening around your university.</p>
+  </v-sheet>
+
   <v-sheet class="mx-auto" max-width="1000">
     <!-- Upcoming Events -->
     <h2 class="mt-8">Upcoming Events</h2>
-    <v-slide-group>
-      <v-slide-item v-for="event in events" :key="event.id">
-        <div class="card-wrapper">
-          <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
-            :content="event.content" />
-        </div>
-      </v-slide-item>
-    </v-slide-group>
+    <v-fade-transition>
+      <div v-if="loading">
+        <v-row>
+          <v-col v-for="n in 3" :key="n">
+            <v-skeleton-loader type="image, article" height="250" class="mb-4" />
+          </v-col>
+        </v-row>
+      </div>
+      <v-slide-group v-else show-arrows center-active class="py-4">
+        <v-slide-item v-for="event in events" :key="event.id">
+          <div class="card-wrapper">
+            <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
+              :content="event.content" />
+          </div>
+        </v-slide-item>
+      </v-slide-group>
+    </v-fade-transition>
+
+    <!-- Fallback if empty events -->
+    <v-fade-transition>
+      <v-alert v-if="events.length === 0 && !loading" type="info" variant="tonal" class="my-6" border="start">
+        No upcoming events found. Try again later or check your followed events below.
+      </v-alert>
+    </v-fade-transition>
 
     <!-- Bottom: Followed Events Grid -->
     <h2 class="mt-8">Your Followed Events</h2>
@@ -31,54 +52,27 @@
 
     <!-- Pagination -->
     <!-- Followed Events Grid or Skeleton Loader -->
-<v-fade-transition>
-  <v-row v-if="!loading">
-    <v-col
-      v-for="event in paginatedEvents"
-      :key="event.id"
-      cols="12"
-      sm="6"
-      md="4"
-    >
-      <EventCard
-        :id="event.id"
-        :imageSrc="event.imageBase64"
-        :title="event.title"
-        :subtitle="event.subtitle"
-        :content="event.content"
-      />
-    </v-col>
-  </v-row>
+    <v-fade-transition>
+      <v-row v-if="!loading">
+        <v-col v-for="event in paginatedEvents" :key="event.id" cols="12" sm="6" md="4">
+          <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
+            :content="event.content" />
+        </v-col>
+      </v-row>
 
-  <!-- Skeleton loader while loading -->
-  <v-row v-else>
-    <v-col
-      v-for="n in itemsPerPage"
-      :key="n"
-      cols="12"
-      sm="6"
-      md="4"
-    >
-      <v-skeleton-loader
-        type="image, article"
-        height="250"
-        class="mb-4"
-      />
-    </v-col>
-  </v-row>
-</v-fade-transition>
+      <!-- Skeleton loader while loading -->
+      <v-row v-else>
+        <v-col v-for="n in itemsPerPage" :key="n" cols="12" sm="6" md="4">
+          <v-skeleton-loader type="image, article" height="250" class="mb-4" />
+        </v-col>
+      </v-row>
+    </v-fade-transition>
 
-<!-- Pagination Control -->
-<v-fade-transition>
-  <v-pagination
-    v-if="!loading && totalPages > 1"
-    v-model="currentPage"
-    :length="totalPages"
-    class="my-4 d-flex justify-center"
-    rounded
-    color="primary"
-  />
-</v-fade-transition>
+    <!-- Pagination Control -->
+    <v-fade-transition>
+      <v-pagination v-if="!loading && totalPages > 1" v-model="currentPage" :length="totalPages"
+        class="my-4 d-flex justify-center" rounded color="primary" />
+    </v-fade-transition>
 
     <!-- <v-row>
       <v-col v-for="event in followedEvents" :key="event.id" cols="12" sm="6" md="4">
@@ -256,12 +250,14 @@ const followedEvents = computed(() => {
 const { appContext } = getCurrentInstance();
 const axios = appContext.config.globalProperties.$http; // Uses token from main.js interceptor
 
+const loading = ref(false); // Loading state
+
 onMounted(async () => {
+  loading.value = true;
   try {
     // Fetch events from backend endpoint using axios now
     const response = await axios.get("http://localhost/api/events");
     events.value = response.data;
-    loading.value = true; // Set loading to false after data is fetched
   } catch (error) {
     console.error("Error loading events:", error);
     alert("You must be logged in to see events.");
@@ -273,8 +269,8 @@ onMounted(async () => {
 
 // Pagination logic (if needed in the future)
 const currentPage = ref(1);
-const itemsPerPage =6; // Number of items per page
-const loading = ref(false); // Loading state
+const itemsPerPage = 6; // Number of items per page
+
 
 const paginatedEvents = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -322,7 +318,22 @@ watch(filterOption, async () => {
 }
 
 .v-fade-transition-enter-active,
-.v-fade-transition-leave-active {
+.v-fade-transition-leave-active
+{
   transition: opacity 0.5s ease;
+}
+
+@media (max-width: 600px)
+{
+  .card-wrapper
+  {
+    width: 90vw;
+    margin-right: 12px;
+  }
+
+  .v-sheet
+  {
+    padding: 0 8px;
+  }
 }
 </style>
