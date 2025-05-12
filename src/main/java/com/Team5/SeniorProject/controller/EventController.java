@@ -24,7 +24,7 @@ import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
-
+import com.Team5.SeniorProject.service.EmailService;
 
 
 @RestController
@@ -39,6 +39,9 @@ public class EventController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
 	@GetMapping
 	public List<Event> getAllEvents() {
 		return eventRepository.findAll();
@@ -50,7 +53,6 @@ public class EventController {
             // Category
             // Author cle
             @RequestParam("title") String title,
-            @RequestParam("subtitle") String subtitle,
             @RequestParam("category") String category,
             @RequestParam("description") String description,
             // DateTime
@@ -74,7 +76,6 @@ public class EventController {
             // Step 3: Save event with imageUrl
             Event event = new Event();
             event.setTitle(title);
-            event.setSubtitle(subtitle);
             event.setCategory(category);
             event.setDescription(description);
             event.setTime(LocalDateTime.parse(time));
@@ -98,8 +99,12 @@ public class EventController {
     }
     //EndPoint: Find events by username.
     @GetMapping("/user/{username}")
-    public List<Event> getEventByUsername(@PathVariable String username){
-        return eventRepository.findByUser_Username(username);
+    public ResponseEntity<List<Event>> getEventByUsername(@PathVariable String username){
+        List<Event> events = eventRepository.findByUser_Username(username);
+        if (events.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(events, HttpStatus.OK);
     }
 
     //EndPoint: Updates the events
@@ -154,12 +159,21 @@ public class EventController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id){
         if(!eventRepository.existsById(id)){
-            return ResponseEntity.noContent().build();//If event does not exist.
+            return ResponseEntity.noContent().build(); //If event does not exist.
         }
+        Event event = eventRepository.findById(id).orElse(null);
+        if (event.getUser() != null) {
+            User user = event.getUser();
+            String title = event.getTitle();
+            eventRepository.deleteById(id);
+            emailService.sendEventDeletionEmail(user, title);
+            }
 
-        eventRepository.deleteById(id);
         return ResponseEntity.noContent().build();// Deletes the event.
     }
+
     
     
+    
+
 }

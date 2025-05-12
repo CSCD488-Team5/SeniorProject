@@ -39,16 +39,16 @@ public class ApiDataInitializer implements ApplicationListener<ApplicationReadyE
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
 		try {
-            uploadEvent("Outdoor Basketball Showdown", "Feel the energy of the court", "Sport", "Join us for an epic outdoor basketball event!",
+            uploadEvent("Outdoor Basketball Showdown", "Sport", "Join us for an epic outdoor basketball event!",
                     "2023-07-15T15:00:00", "Campus Basketball Court", event1Image, "bob");
 
-            uploadEvent("Graduation Commencement", "Celebrating Academic Achievements", "College", "Celebrate the graduation of our amazing class!",
+            uploadEvent("Graduation Commencement", "College", "Celebrate the graduation of our amazing class!",
                     "2023-12-25T10:00:00", "Main Auditorium", event2Image, "bob");
 
-            uploadEvent("Advanced Mathematics Workshop", "Sharpen your problem-solving skills", "Math", "Dive into advanced math concepts in this interactive workshop.",
+            uploadEvent("Advanced Mathematics Workshop", "Math", "Dive into advanced math concepts in this interactive workshop.",
                     "2023-11-05T09:00:00", "Engineering Building", event3Image, "alice");
 
-            uploadEvent("Evening of Inspiration", "Ideas that spark change", "Event", "Join a dynamic lineup of speakers and performers for an immersive evening of inspiration.",
+            uploadEvent("Evening of Inspiration",  "Event", "Join a dynamic lineup of speakers and performers for an immersive evening of inspiration.",
                     "2023-10-20T18:00:00", "Performing Arts Center", event4Image, "alice");
 
         } catch (IOException e) {
@@ -56,7 +56,7 @@ public class ApiDataInitializer implements ApplicationListener<ApplicationReadyE
         }
 	}
 
-	 private void uploadEvent(String title, String subtitle, String category, String description, String time, String location, Resource imageResource, String username) throws IOException {
+	 private void uploadEvent(String title, String category, String description, String time, String location, Resource imageResource, String username) throws IOException {
 
         ByteArrayResource fileAsResource = new ByteArrayResource(imageResource.getInputStream().readAllBytes()) {
             @Override
@@ -67,7 +67,6 @@ public class ApiDataInitializer implements ApplicationListener<ApplicationReadyE
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("title", title);
-        body.add("subtitle", subtitle);
         body.add("category", category);
         body.add("description", description);
         body.add("time", time);

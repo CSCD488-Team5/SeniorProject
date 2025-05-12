@@ -7,9 +7,12 @@
           <EventCard 
             :id="event.id"
             :imageSrc="event.imageUrl" 
-            :title="event.title" 
-            :subtitle="event.subtitle"
-            :content="event.content" 
+            :title="event.title"
+            :category="event.category"
+            :description="event.description"
+            :location="event.location"
+            :time="event.time"
+            :username="event.user?.username"
           />
         </div>
       </v-slide-item>

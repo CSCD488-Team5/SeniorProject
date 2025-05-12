@@ -1,8 +1,19 @@
 <template>
 	<v-card class="mx-auto" fixed-width-card>
 		<v-img height="200px" :src="computedImageSrc" cover></v-img>
+
 		<v-card-title class="title-wrap">{{ title }}</v-card-title>
-		<v-card-subtitle>{{ subtitle }}</v-card-subtitle>
+
+		<v-card-subtitle class="text-caption text-grey">
+			Posted by 
+			<router-link
+				:to="{ name: 'Profile', params: { username: username } }"
+				class="clickable-username"
+				>
+				@{{ username }}
+			</router-link>
+			&mdash; {{ location }}
+		</v-card-subtitle>
 
 		<v-card-actions>
 			<v-btn color="orange-darken-3" text variant="tonal" @click="goToEventDetails">Explore</v-btn>
@@ -25,7 +36,10 @@
 			<div v-show="show">
 				<v-divider></v-divider>
 				<v-card-text>
-					{{ content }}
+					<p><strong>Category: </strong> {{ category }}</p>
+					<p><strong>Date:</strong> {{ formattedDate }}</p>
+					<p><strong>Time: </strong> {{  formattedTime }}</p>
+					<p>{{ description }}</p>
 				</v-card-text>
 			</div>
 		</v-expand-transition>
@@ -42,11 +56,14 @@ const axios = appContext.config.globalProperties.$http
 
 
 const props = defineProps({
-	imageSrc: { type: String, required: true },
-	title: { type: String, required: true },
-	subtitle: { type: String, required: true },
-	content: { type: String, required: true },
-	id: Number
+	id: Number,
+	title: String,
+	category: String,
+	description: String,
+	location: String,
+	time: String,
+	imageSrc: String,
+	username: String, // Creator of the post
 })
 
 const computedImageSrc = computed(() => {
@@ -70,6 +87,7 @@ const router = useRouter();
 function goToEventDetails() {
 	router.push({ name: 'EventDetails', params: { id: props.id } });
 }
+
 
 async function joinEvent() {
 	const username = getUsernameFromToken()
@@ -107,6 +125,24 @@ async function unjoinEvent() {
   }
 }
 
+const formattedTime = computed( () => {
+	if (!props.time) return ''
+	const date = new Date(props.time)
+	return date.toLocaleTimeString([], {  hour: '2-digit', minute: '2-digit' })
+})
+
+const formattedDate = computed(() => {
+	if (!props.time) return ''
+	const date = new Date(props.time)
+	return date.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })
+})
+
+function goToUserProfile() {
+  router.push({ name: 'Profile', params: { username: props.username } });
+}
+</script>
+
+
 
 
 </script>
@@ -121,5 +157,13 @@ async function unjoinEvent() {
 	white-space: normal;
 	overflow: visible;
 	word-wrap: break-word;
+}
+
+.clickable-username {
+  color: #1976d2;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 </style>
