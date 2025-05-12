@@ -49,6 +49,10 @@
     <v-select v-if="filterOption === 'people'" v-model="selectedValue" :items="peopleOptions" label="Select a person"
       class="mb-4" dense clearable outlined />
 
+    <!-- Search bar -->
+    <v-text-field v-model="searchQuery" label="Search followed events" prepend-inner-icon="mdi-magnify" clearable
+      class="mb-4" dense outlined @click:clear="onSearchClear" />
+
 
     <!-- Pagination -->
     <!-- Followed Events Grid or Skeleton Loader -->
@@ -236,16 +240,36 @@ const selectedValue = ref(null); // dropdown selection
 const categoryOptions = ['Sports', 'Tech', 'Math', 'Science'];
 const peopleOptions = ['ProfJane', 'CoachMike', 'DevJoe'];
 
+const searchQuery = ref('');
+
 // Simulated filtered results
 const followedEvents = computed(() => {
+  let filtered = allFollowedEvents.value;
+
   if (filterOption.value === 'category' && selectedValue.value) {
-    return allFollowedEvents.value.filter(e => e.category === selectedValue.value);
+    filtered = filtered.filter(e => e.category === selectedValue.value);
   } else if (filterOption.value === 'people' && selectedValue.value) {
-    return allFollowedEvents.value.filter(e => e.createdBy === selectedValue.value);
-  } else {
-    return allFollowedEvents.value;
+    filtered = filtered.filter(e => e.createdBy === selectedValue.value);
   }
+
+  if (searchQuery.value.trim() !== '') {
+    const q = searchQuery.value.trim().toLowerCase();
+    filtered = filtered.filter(e =>
+      e.title.toLowerCase().includes(q) ||
+      e.subtitle.toLowerCase().includes(q) ||
+      e.content.toLowerCase().includes(q)
+    );
+  }
+
+  return filtered;
 });
+
+function onSearchClear() {
+  searchQuery.value = '';
+  selectedValue.value = null;
+  filterOption.value = 'all';
+  currentPage.value = 1;
+}
 
 const { appContext } = getCurrentInstance();
 const axios = appContext.config.globalProperties.$http; // Uses token from main.js interceptor
@@ -292,6 +316,14 @@ watch(filterOption, async () => {
   currentPage.value = 1; // reset pagination when switching filter type
   followedLoading.value = false; // Set loading to false after data is fetched
 });
+
+watch(searchQuery, (val) => {
+  if (val === '') {
+    selectedValue.value = null;
+    filterOption.value = 'all';
+    currentPage.value = 1;
+  }
+})
 </script>
 
 
