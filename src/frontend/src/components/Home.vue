@@ -6,41 +6,20 @@
   </v-sheet>
 
   <v-sheet class="mx-auto" max-width="1000">
-    <!-- Upcoming Events -->
-    <h2 class="mt-8">Upcoming Events</h2>
-    <v-fade-transition>
-      <div v-if="upcomingLoading">
-        <v-row>
-          <v-col v-for="n in 3" :key="n">
-            <v-skeleton-loader type="image, article" height="250" class="mb-4" />
-          </v-col>
-        </v-row>
-      </div>
-      <v-slide-group v-else show-arrows center-active class="py-4">
-        <v-slide-item v-for="event in events" :key="event.id">
-          <div class="card-wrapper">
-            <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
-              :content="event.content" />
-          </div>
-        </v-slide-item>
-      </v-slide-group>
-    </v-fade-transition>
 
-    <!-- Fallback if empty events -->
-    <v-fade-transition>
-      <v-alert v-if="events.length === 0 && !upcomingLoading" type="info" variant="tonal" class="my-6" border="start">
-        No upcoming events found. Try again later or check your followed events below.
-      </v-alert>
-    </v-fade-transition>
 
     <!-- Bottom: Followed Events Grid -->
-    <h2 class="mt-8">Your Followed Events</h2>
-
+    <h2 class="mt-8">Browse Events</h2>
+    <p class="text-subtitle-2 mb-4">
+      Search and filter to discover events — or toggle to see only the ones you're following.
+    </p>
     <v-radio-group v-model="filterOption" row class="mb-4" color="primary" inline>
       <v-radio label="All" value="all" />
-      <v-radio label="Filter by Category (Sports)" value="category" />
-      <v-radio label="Filter by People (ProfJane)" value="people" />
+      <v-radio label="Filter by Category" value="category" />
+      <v-radio label="Filter by People" value="people" />
     </v-radio-group>
+
+    <v-switch v-model="showFollowedOnly" label="Show only followed events" color="primary" inset class="mb-4" />
 
     <!-- Show dropdown only if category or people is selected -->
     <v-select v-if="filterOption === 'category'" v-model="selectedValue" :items="categoryOptions"
@@ -79,7 +58,7 @@
     </v-fade-transition>
 
     <!-- <v-row>
-      <v-col v-for="event in followedEvents" :key="event.id" cols="12" sm="6" md="4">
+      <v-col v-for="event in filteredEvents" :key="event.id" cols="12" sm="6" md="4">
         <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
           :content="event.content" />
       </v-col>
@@ -93,8 +72,7 @@
 import { ref, onMounted, getCurrentInstance, computed, watch } from 'vue';
 import EventCard from './EventCard.vue';
 
-const events = ref([]); // Reactive variable for events
-const allFollowedEvents = ref([
+const allEvents = ref([
   {
     id: 101,
     title: "Basketball Game",
@@ -243,8 +221,17 @@ const peopleOptions = ['ProfJane', 'CoachMike', 'DevJoe'];
 const searchQuery = ref('');
 
 // Simulated filtered results
-const followedEvents = computed(() => {
-  let filtered = allFollowedEvents.value;
+
+const showFollowedOnly = ref(false);
+
+
+
+const filteredEvents = computed(() => {
+  let filtered = allEvents.value;
+
+  if (showFollowedOnly.value) {
+    filtered = filtered.filter(e => e.followed); // assumes each event has a `followed: true/false` flag
+  }
 
   if (filterOption.value === 'category' && selectedValue.value) {
     filtered = filtered.filter(e => e.category === selectedValue.value);
@@ -275,24 +262,8 @@ const { appContext } = getCurrentInstance();
 const axios = appContext.config.globalProperties.$http; // Uses token from main.js interceptor
 
 // const loading = ref(false); // Loading state
-const upcomingLoading = ref(false);
 const followedLoading = ref(false);
 
-
-
-onMounted(async () => {
-  upcomingLoading.value = true;
-  try {
-    // Fetch events from backend endpoint using axios now
-    const response = await axios.get("http://localhost/api/events");
-    events.value = response.data;
-  } catch (error) {
-    console.error("Error loading events:", error);
-    alert("You must be logged in to see events.");
-  } finally {
-    upcomingLoading.value = false; // Set loading to false after data is fetched
-  }
-});
 
 
 // Pagination logic (if needed in the future)
@@ -302,11 +273,11 @@ const itemsPerPage = 6; // Number of items per page
 
 const paginatedEvents = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
-  return followedEvents.value.slice(start, start + itemsPerPage);
+  return filteredEvents.value.slice(start, start + itemsPerPage);
 });
 
 const totalPages = computed(() => {
-  return Math.ceil(followedEvents.value.length / itemsPerPage);
+  return Math.ceil(filteredEvents.value.length / itemsPerPage);
 });
 
 watch(filterOption, async () => {
