@@ -5,18 +5,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
 import com.Team5.SeniorProject.model.User;
-
+import java.util.List;
 @Service
 public class EmailService {
     
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendEventDeletionEmail(User user, String eventTitle) {
-        String subject = "Posted Deleted from CampusHive";
-        String message = "Hi " + user.getUsername() + ",\n\n" + 
-                         "Your post titled \"" + eventTitle + "\" has been successfully deleted from CampusHive.\n\n" +
-                         "Thanks, \nCampusHive Team";
+    public void sendEventDeletionEmail(List<User> users, String eventTitle) {
+        String subject = "Event Deleted Notification - CampusHive";
+        
+        for (User user : users) {
+            String message = "Hi " + user.getUsername() + ",\n\n" +
+                             "The event titled \"" + eventTitle + "\" that you joined has been deleted.\n\n" + 
+                             "Thanks,\nCampusHive Team";
+
+        
 
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(user.getEmail());
@@ -24,5 +28,7 @@ public class EmailService {
         email.setText(message);
         mailSender.send(email);
     }
+
+}
 
 }
