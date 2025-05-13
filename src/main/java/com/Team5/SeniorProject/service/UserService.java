@@ -3,16 +3,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.Team5.SeniorProject.model.User;
+import com.Team5.SeniorProject.repository.EventRepository;
+import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 
 @Service
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final JoinedEventRepository joinedEventRepository;
+	private final EventRepository eventRepository;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JoinedEventRepository joinedEventRepository, EventRepository eventRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.joinedEventRepository = joinedEventRepository;
+		this.eventRepository = eventRepository;
 	}
 
 	public User signup(User user, String role) throws Exception {
@@ -30,6 +36,14 @@ public class UserService {
 	public boolean existsByUsername(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
+
+	public void deleteUserByUsername(String username) {
+		userRepository.findByUsername(username).ifPresent(user -> {
+			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));
+			eventRepository.deleteAll(eventRepository.findByUser_Username(username));
+			userRepository.delete(user);
+		});
+	}
 
 	
 }

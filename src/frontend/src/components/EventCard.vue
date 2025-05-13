@@ -17,6 +17,15 @@
 
 		<v-card-actions>
 			<v-btn color="orange-darken-3" text variant="tonal" @click="goToEventDetails">Explore</v-btn>
+			<v-btn
+  				:color="joined ? 'red-darken-3' : 'green-darken-3'"
+  				text
+  				variant="tonal"
+  				@click="joined ? unjoinEvent() : joinEvent()"
+			>
+  				{{ joined ? 'Unjoin' : 'Join' }}
+			</v-btn>
+
 			<v-spacer></v-spacer>
 			<v-btn icon @click="toggleContent">
 				<v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
@@ -38,8 +47,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, getCurrentInstance} from 'vue'
 import { useRouter } from 'vue-router'
+import { getUsernameFromToken } from '@/utils/jwt'
+
+const { appContext } = getCurrentInstance()
+const axios = appContext.config.globalProperties.$http
+
 
 const props = defineProps({
 	id: Number,
@@ -61,6 +75,9 @@ const computedImageSrc = computed(() => {
 })
 
 const show = ref(false)
+const joined = ref(false)
+
+
 const toggleContent = () => {
 	show.value = !show.value
 }
@@ -69,6 +86,43 @@ const router = useRouter();
 
 function goToEventDetails() {
 	router.push({ name: 'EventDetails', params: { id: props.id } });
+}
+
+
+async function joinEvent() {
+	const username = getUsernameFromToken()
+	if (!username) {
+		alert('Please log in to join the event.')
+		return
+	}
+
+	try {
+		await axios.post(`http://localhost/api/events/${props.id}/join`, null, {
+			params: { username }
+		})
+		joined.value = true
+	} catch (error) {
+		console.error('Join event error:', error.response);
+		alert(error.response?.data || 'Failed to join the event')
+	}
+}
+
+async function unjoinEvent() {
+  const username = getUsernameFromToken()
+  if (!username) {
+    alert('Please log in to unjoin the event.')
+    return
+  }
+
+  try {
+    await axios.delete(`http://localhost/api/events/${props.id}/unjoin`, {
+      params: { username }
+    })
+    joined.value = false
+  } catch (error) {
+    console.error('Unjoin event error:', error.response)
+    alert(error.response?.data || 'Failed to unjoin the event')
+  }
 }
 
 const formattedTime = computed( () => {
@@ -88,6 +142,10 @@ function goToUserProfile() {
 }
 </script>
 
+
+
+
+</script>
 <style scoped>
 .fixed-width-card
 {
