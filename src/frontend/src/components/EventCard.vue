@@ -145,7 +145,7 @@ function goToUserProfile() {
 
 
 
-</script>
+
 <style scoped>
 .fixed-width-card
 {
