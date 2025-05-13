@@ -2,8 +2,6 @@ package com.Team5.SeniorProject.model;
 
 import java.time.LocalDateTime;
 
-import org.springframework.cglib.core.Local;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,16 +16,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-
 @Entity
-@Table(name = "registrationsJ", uniqueConstraints = @UniqueConstraint(columnNames = {"event_id","user_id"}))
+@Table(name = "postComments")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class JoinEvent {
+public class PostComments {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -38,5 +35,7 @@ public class JoinEvent {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDateTime joined = LocalDateTime.now();   
+    private LocalDateTime joined = LocalDateTime.now();
+    
+    
 }
