@@ -2,6 +2,7 @@ package com.Team5.SeniorProject.controller;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.Team5.SeniorProject.model.Event;
+import com.Team5.SeniorProject.model.EventCategory;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
@@ -51,7 +53,7 @@ public class EventController {
             // Category
             // Author cle
             @RequestParam("title") String title,
-            @RequestParam("category") String category,
+            @RequestParam("category") String categoryStr,
             @RequestParam("description") String description,
             // DateTime
             @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
@@ -61,6 +63,13 @@ public class EventController {
         try {
 
             User user = userRepository.findByUsername(username).orElseThrow(() ->  new RuntimeException("User was not found for upload!"));
+
+            EventCategory category;
+            try {
+                category = EventCategory.valueOf(categoryStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
 
             // Step 1: Save image to /static/images/events/
             String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
@@ -109,7 +118,7 @@ public class EventController {
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable long id,
     @RequestParam("title") String title,
-    @RequestParam("category") String category,
+    @RequestParam("category") String categoryStr,
     @RequestParam("description") String description,
     @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
     @RequestParam("location") String location,
@@ -121,6 +130,13 @@ public class EventController {
 
         User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new RuntimeException("User was not found!"));
+
+        EventCategory category;
+        try {
+            category = EventCategory.valueOf(categoryStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
 
         //Set all attributes of the event, except Image
         event.setTitle(title);
@@ -170,7 +186,9 @@ public class EventController {
 
     @GetMapping("/categories")
     public ResponseEntity<List<String>> getUniqueCategories() {
-        List<String> categories = eventRepository.findDistinctCategories();
+        List<String> categories = Arrays.stream(EventCategory.values())
+            .map(Enum::name)
+            .toList();
         return ResponseEntity.ok(categories);
     }
 
