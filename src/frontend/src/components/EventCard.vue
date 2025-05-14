@@ -6,12 +6,17 @@
 
 		<v-card-subtitle class="text-caption text-grey">
 			Posted by 
-			<router-link
-				:to="{ name: 'Profile', params: { username: username } }"
-				class="clickable-username"
+			<template v-if="username">
+				<router-link
+					:to="{ name: 'Profile', params: { username: username } }"
+					class="clickable-username"
 				>
-				@{{ username }}
-			</router-link>
+					@{{ username }}
+				</router-link>
+			</template>
+			<template v-else>
+				<span class="text-grey">Unknown</span>
+			</template>
 			&mdash; {{ location }}
 		</v-card-subtitle>
 

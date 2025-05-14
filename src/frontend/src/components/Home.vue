@@ -38,8 +38,15 @@
     <v-fade-transition>
       <v-row v-if="!followedLoading">
         <v-col v-for="event in paginatedEvents" :key="event.id" cols="12" sm="6" md="4">
-          <EventCard :id="event.id" :imageSrc="event.imageBase64" :title="event.title" :subtitle="event.subtitle"
-            :content="event.content" />
+          <EventCard 
+          :id="event.id" 
+          :imageSrc="event.imageUrl" 
+          :title="event.title" 
+          :category="event.category"
+          :description="event.description"
+          :location="event.location"
+          :time="event.time"
+          :username="event.user?.username" />
         </v-col>
       </v-row>
 
@@ -63,22 +70,6 @@
           :content="event.content" />
       </v-col>
     </v-row> -->
-    <v-slide-group>
-      <v-slide-item v-for="event in events" :key="event.id">
-        <div class="card-wrapper">
-          <EventCard 
-            :id="event.id"
-            :imageSrc="event.imageUrl" 
-            :title="event.title"
-            :category="event.category"
-            :description="event.description"
-            :location="event.location"
-            :time="event.time"
-            :username="event.user?.username"
-          />
-        </div>
-      </v-slide-item>
-    </v-slide-group>
   </v-sheet>
 
 
@@ -88,143 +79,19 @@
 import { ref, onMounted, getCurrentInstance, computed, watch } from 'vue';
 import EventCard from './EventCard.vue';
 
-const allEvents = ref([
-  {
-    id: 101,
-    title: "Basketball Game",
-    subtitle: "March Madness",
-    content: "Come cheer for your team!",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Basketball",
-    category: "Sports",
-    createdBy: "CoachMike"
-  },
-  {
-    id: 102,
-    title: "Math Club Meetup",
-    subtitle: "Integration Party",
-    content: "Discuss calculus and have fun!",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Math+Club",
-    category: "Math",
-    createdBy: "ProfJane"
-  },
-  {
-    id: 103,
-    title: "Coding Workshop",
-    subtitle: "Intro to Vue.js",
-    content: "Build a frontend app in 2 hours",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Coding",
-    category: "Tech",
-    createdBy: "DevJoe"
-  },
-  {
-    id: 104,
-    title: "Soccer Game",
-    subtitle: "Team A vs Team B",
-    content: "College sports event",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Soccer",
-    category: "Sports",
-    createdBy: "CoachMike"
-  },
-  {
-    id: 105,
-    title: "Physics Talk",
-    subtitle: "Quantum Fun",
-    content: "Learn about particles",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Physics",
-    category: "Science",
-    createdBy: "ProfJane"
-  },
-  {
-    id: 106,
-    title: "Art Showcase",
-    subtitle: "Student Gallery",
-    content: "A collection of student artwork.",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Art+Showcase",
-    category: "Arts",
-    createdBy: "ArtProf"
-  },
-  {
-    id: 107,
-    title: "Chemistry Lab",
-    subtitle: "Acids & Bases",
-    content: "Live demo in science building.",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Chem+Lab",
-    category: "Science",
-    createdBy: "ProfJane"
-  },
-  {
-    id: 108,
-    title: "Hackathon",
-    subtitle: "24-hour coding event",
-    content: "Teams compete to build apps.",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Hackathon",
-    category: "Tech",
-    createdBy: "DevJoe"
-  },
-  {
-    id: 109,
-    title: "Football Tailgate",
-    subtitle: "Before the big game",
-    content: "Food, games, and spirit!",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Tailgate",
-    category: "Sports",
-    createdBy: "CoachMike"
-  },
-  {
-    id: 110,
-    title: "Data Science Meetup",
-    subtitle: "Trends in Machine Learning",
-    content: "Networking and talks.",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Data+Science",
-    category: "Tech",
-    createdBy: "DevJoe"
-  },
-  {
-    id: 111,
-    title: "Open Mic Night",
-    subtitle: "Poetry and music",
-    content: "Sign up to perform!",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Open+Mic",
-    category: "Arts",
-    createdBy: "ClubEvents"
-  },
-  {
-    id: 112,
-    title: "Astronomy Club",
-    subtitle: "Night Sky Viewing",
-    content: "Telescope setup on roof",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Astronomy",
-    category: "Science",
-    createdBy: "ProfJane"
-  },
-  {
-    id: 113,
-    title: "D&D Game Night",
-    subtitle: "Fantasy & fun",
-    content: "Join a campaign!",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=DND",
-    category: "Games",
-    createdBy: "ClubEvents"
-  },
-  {
-    id: 114,
-    title: "Debate Club",
-    subtitle: "Free Speech Forum",
-    content: "Discuss current issues.",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Debate",
-    category: "Politics",
-    createdBy: "ProfJane"
-  },
-  {
-    id: 115,
-    title: "Startup Pitch Night",
-    subtitle: "Student Entrepreneurs",
-    content: "Pitch your business idea!",
-    imageBase64: "https://via.placeholder.com/300x200.png?text=Startup+Night",
-    category: "Business",
-    createdBy: "DevJoe"
+const allEvents = ref([]);
+
+onMounted(async () => {
+  followedLoading.value = true
+  try {
+    const response = await axios.get('api/events')
+    allEvents.value = response.data
+  } catch (error) {
+    console.error('Error fetching events: ', error)
+  } finally {
+    followedLoading.value = false
   }
-]);
+})
 
 
 const filterOption = ref('all'); // "category" or "people"
@@ -259,8 +126,9 @@ const filteredEvents = computed(() => {
     const q = searchQuery.value.trim().toLowerCase();
     filtered = filtered.filter(e =>
       e.title.toLowerCase().includes(q) ||
-      e.subtitle.toLowerCase().includes(q) ||
-      e.content.toLowerCase().includes(q)
+      e.description.toLowerCase().includes(q) ||
+      e.category.toLowerCase().includes(q) ||
+      e.location.toLowerCase().includes(q)
     );
   }
 
