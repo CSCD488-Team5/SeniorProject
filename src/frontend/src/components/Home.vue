@@ -93,12 +93,21 @@ onMounted(async () => {
   }
 })
 
+onMounted(async () => {
+  try {
+    const response = await axios.get('api/events/categories')
+    categoryOptions.value = response.data;
+  } catch (error) {
+    console.error('Error fetching categories: ', error)
+  }
+})
+
 
 const filterOption = ref('all'); // "category" or "people"
 const selectedValue = ref(null); // dropdown selection
 
 // These will power the dropdown options
-const categoryOptions = ['Sports', 'Tech', 'Math', 'Science'];
+const categoryOptions = ref([]);
 const peopleOptions = ['ProfJane', 'CoachMike', 'DevJoe'];
 
 const searchQuery = ref('');
