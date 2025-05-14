@@ -8,28 +8,35 @@
   <v-sheet class="mx-auto" max-width="1000">
 
 
-    <!-- Bottom: Followed Events Grid -->
+    <!-- Bottom: Events Grid -->
     <h2 class="mt-8">Browse Events</h2>
     <p class="text-subtitle-2 mb-4">
       Search and filter to discover events — or toggle to see only the ones you're following.
     </p>
-    <v-radio-group v-model="filterOption" row class="mb-4" color="primary" inline>
-      <v-radio label="All" value="all" />
-      <v-radio label="Filter by Category" value="category" />
-      <v-radio label="Filter by People" value="people" />
-    </v-radio-group>
+    <v-row class="d-flex flex-wrap align-center mb-4 gap-4">
+      <v-col cols="12" sm="6" md="4">
+        <v-radio-group v-model="filterOption" row color="primary" inline>
+          <v-radio label="All" value="all" />
+          <v-radio label="Category" value="category" />
+          <v-radio label="People" value="people" />
+        </v-radio-group>
+      </v-col>
 
-    <v-switch v-model="showFollowedOnly" label="Show only followed events" color="primary" inset class="mb-4" />
+      <v-col cols="auto" class="d-flex align-center pt-0">
+        <v-switch v-model="showFollowedOnly" label="Show only followed" color="primary" hide-details  density="compact"/>
+      </v-col>
 
-    <!-- Show dropdown only if category or people is selected -->
-    <v-select v-if="filterOption === 'category'" v-model="selectedValue" :items="categoryOptions"
-      label="Select a category" class="mb-4" dense clearable outlined />
+      <v-col v-if="filterOption === 'category'" cols="12" sm="6" md="3">
+        <v-select v-model="selectedValue" :items="categoryOptions" label="Category" dense clearable outlined />
+      </v-col>
 
-    <v-select v-if="filterOption === 'people'" v-model="selectedValue" :items="peopleOptions" label="Select a person"
-      class="mb-4" dense clearable outlined />
+      <v-col v-if="filterOption === 'people'" cols="12" sm="6" md="3">
+        <v-select v-model="selectedValue" :items="peopleOptions" label="Person" dense clearable outlined />
+      </v-col>
+    </v-row>
 
     <!-- Search bar -->
-    <v-text-field v-model="searchQuery" label="Search followed events" prepend-inner-icon="mdi-magnify" clearable
+    <v-text-field v-model="searchQuery" label="Search events" prepend-inner-icon="mdi-magnify" clearable
       class="mb-4" dense outlined @click:clear="onSearchClear" />
 
 
