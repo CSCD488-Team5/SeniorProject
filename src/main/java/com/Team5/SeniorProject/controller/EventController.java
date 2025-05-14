@@ -111,7 +111,6 @@ public class EventController {
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable long id,
     @RequestParam("title") String title,
-    @RequestParam("subtitle") String subtitle,
     @RequestParam("category") String category,
     @RequestParam("description") String description,
     @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
@@ -127,7 +126,6 @@ public class EventController {
 
         //Set all attributes of the event, except Image
         event.setTitle(title);
-        event.setSubtitle(subtitle);
         event.setCategory(category);
         event.setDescription(description);
         event.setTime(LocalDateTime.parse(time));
