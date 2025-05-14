@@ -63,6 +63,22 @@
           :content="event.content" />
       </v-col>
     </v-row> -->
+    <v-slide-group>
+      <v-slide-item v-for="event in events" :key="event.id">
+        <div class="card-wrapper">
+          <EventCard 
+            :id="event.id"
+            :imageSrc="event.imageUrl" 
+            :title="event.title"
+            :category="event.category"
+            :description="event.description"
+            :location="event.location"
+            :time="event.time"
+            :username="event.user?.username"
+          />
+        </div>
+      </v-slide-item>
+    </v-slide-group>
   </v-sheet>
 
 

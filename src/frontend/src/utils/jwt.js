@@ -13,3 +13,16 @@ export function isTokenValid() {
         return false;
     }
 }
+
+export function getUsernameFromToken() {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+        const decoded = jwtDecode(token);
+        return decoded.sub || null; // sub is where the username is stored
+    } catch (error) {
+        console.error('Failed to decode token:', error);
+        return null;
+    }
+}

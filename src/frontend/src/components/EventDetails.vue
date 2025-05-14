@@ -3,17 +3,22 @@
     <div v-if="eventData">
       <!-- Display the event image if available -->
       <v-img
-        v-if="eventData.imageBase64"
+        v-if="eventData.imageUrl"
         :src="formattedImageSrc"
         height="300px"
         cover
       ></v-img>
       <h1>{{ eventData.title }}</h1>
-      <p><strong>Subtitle:</strong> {{ eventData.subtitle }}</p>
-      <p><strong>Content:</strong> {{ eventData.content }}</p>
-      <p><strong>Time:</strong> {{ eventData.time }}</p>
+
+      <v-chip color="primary" class="ma-2" v-if="eventData.category">
+        {{  eventData.category }}
+      </v-chip>
+
+      <p><strong>Created By:</strong> {{  eventData.user.username }}</p>
+      <p><strong>Description:</strong> {{ eventData.description }}</p>
       <p><strong>Location:</strong> {{ eventData.location }}</p>
-      <!-- Add any other details you need -->
+      <p><strong>Date:</strong> {{ formattedDate }}</p>
+      <p><strong>Time:</strong> {{ formattedTime }}</p>
     </div>
     <div v-else>
       <p>Loading event details...</p>
@@ -47,12 +52,23 @@ onMounted(async () => {
 
 // Computed property to format the Base64 image data as a data URI
 const formattedImageSrc = computed(() => {
-  if (eventData.value && eventData.value.imageBase64) {
-    // If the image data doesn't already start with 'data:', prepend the Base64 prefix.
-    return eventData.value.imageBase64.startsWith('data:')
-      ? eventData.value.imageBase64
-      : `data:image/jpeg;base64,${eventData.value.imageBase64}`
+  if (eventData.value && eventData.value.imageUrl) {
+    return eventData.value.imageUrl.startsWith('http')
+      ? eventData.value.imageUrl
+      : `http://localhost:80${eventData.value.imageUrl}`;
   }
-  return ''
+  return '';
+});
+
+const formattedDate = computed(() => {
+  if (!eventData.value || !eventData.value.time) return ''
+  const date = new Date(eventData.value.time)
+  return date.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' })
+})
+
+const formattedTime = computed( () => {
+	if (!eventData.value || !eventData.value.time) return ''
+  const date = new Date(eventData.value.time)
+	return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 })
 </script>
