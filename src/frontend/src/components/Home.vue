@@ -54,7 +54,8 @@
           :location="event.location"
           :time="event.time"
           :username="event.user?.username"
-          :joined="event.joined" />
+          :joined="event.joined" 
+          @update:joined="updateJoinedStatus"/>
         </v-col>
       </v-row>
 
@@ -198,6 +199,11 @@ watch(searchQuery, (val) => {
     currentPage.value = 1;
   }
 })
+
+function updateJoinedStatus({ id, joined }) {
+  const target = allEvents.value.find(e => e.id === id)
+  if (target) target.joined = joined
+}
 </script>
 
 

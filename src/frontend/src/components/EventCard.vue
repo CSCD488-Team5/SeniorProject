@@ -107,6 +107,7 @@ async function joinEvent() {
 			params: { username }
 		})
 		joined.value = true
+		emit('update:joined', { id: props.id, joined: true})
 	} catch (error) {
 		console.error('Join event error:', error.response);
 		alert(error.response?.data || 'Failed to join the event')
@@ -125,6 +126,7 @@ async function unjoinEvent() {
       params: { username }
     })
     joined.value = false
+	emit('update:joined', { id: props.id, joined: false})
   } catch (error) {
     console.error('Unjoin event error:', error.response)
     alert(error.response?.data || 'Failed to unjoin the event')
@@ -146,6 +148,8 @@ const formattedDate = computed(() => {
 function goToUserProfile() {
   router.push({ name: 'Profile', params: { username: props.username } });
 }
+
+const emit = defineEmits(['update:joined'])
 </script>
 
 
