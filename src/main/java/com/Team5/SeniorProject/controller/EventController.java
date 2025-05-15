@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,8 +23,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.Team5.SeniorProject.model.Event;
 import com.Team5.SeniorProject.model.EventCategory;
+import com.Team5.SeniorProject.model.JoinEvent;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
+import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.EmailService;
 
@@ -41,6 +45,9 @@ public class EventController {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private JoinedEventRepository joinedEventRepository;
 
 	@GetMapping
 	public List<Event> getAllEvents() {
@@ -190,6 +197,27 @@ public class EventController {
             .map(Enum::name)
             .toList();
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/getAllEventsForUser/{username}")
+    public ResponseEntity<List<Event>> getAllEventsForUser(@PathVariable String username) {
+        // 1. Get all events
+        List<Event> allEvents = eventRepository.findAll();
+        
+        // 2. Get the list of event IDs the user joined
+        List<JoinEvent> joinedEntries = joinedEventRepository.findByUser_Username(username);
+        Set<Long> joinedEventsIds = joinedEntries.stream()
+            .map(join -> join.getEvent().getId())
+            .collect(Collectors.toSet());
+        
+        // 3. Mark events as joined
+        for (Event event : allEvents) {
+            if (joinedEventsIds.contains(event.getId())) {
+                event.setJoined(true);
+            }
+        }
+
+        return ResponseEntity.ok(allEvents);
     }
 
 }

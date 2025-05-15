@@ -53,7 +53,8 @@
           :description="event.description"
           :location="event.location"
           :time="event.time"
-          :username="event.user?.username" />
+          :username="event.user?.username"
+          :joined="event.joined" />
         </v-col>
       </v-row>
 
@@ -85,16 +86,18 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance, computed, watch } from 'vue';
 import EventCard from './EventCard.vue';
+import { getUsernameFromToken } from '@/utils/jwt'
 
 const allEvents = ref([]);
 
 onMounted(async () => {
   followedLoading.value = true
   try {
-    const response = await axios.get('api/events')
+    const username = getUsernameFromToken();
+    const response = await axios.get(`api/events/getAllEventsForUser/${username}`)
     allEvents.value = response.data
   } catch (error) {
-    console.error('Error fetching events: ', error)
+    console.error('Error fetching personalized events: ', error)
   } finally {
     followedLoading.value = false
   }
@@ -129,7 +132,7 @@ const filteredEvents = computed(() => {
   let filtered = allEvents.value;
 
   if (showFollowedOnly.value) {
-    filtered = filtered.filter(e => e.followed); // assumes each event has a `followed: true/false` flag
+    filtered = filtered.filter(e => e.joined); // assumes each event has a `followed: true/false` flag
   }
 
   if (filterOption.value === 'category' && selectedValue.value) {

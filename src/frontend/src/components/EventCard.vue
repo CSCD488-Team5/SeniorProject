@@ -69,6 +69,7 @@ const props = defineProps({
 	time: String,
 	imageSrc: String,
 	username: String, // Creator of the post
+	joined: Boolean
 })
 
 const computedImageSrc = computed(() => {
@@ -80,7 +81,7 @@ const computedImageSrc = computed(() => {
 })
 
 const show = ref(false)
-const joined = ref(false)
+const joined = ref(props.joined || false)
 
 
 const toggleContent = () => {
