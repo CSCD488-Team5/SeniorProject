@@ -18,7 +18,6 @@
         <v-radio-group v-model="filterOption" row color="primary" inline>
           <v-radio label="All" value="all" />
           <v-radio label="Category" value="category" />
-          <v-radio label="People" value="people" />
         </v-radio-group>
       </v-col>
 
@@ -30,9 +29,7 @@
         <v-select v-model="selectedValue" :items="categoryOptions" label="Category" dense clearable outlined />
       </v-col>
 
-      <v-col v-if="filterOption === 'people'" cols="12" sm="6" md="3">
-        <v-select v-model="selectedValue" :items="peopleOptions" label="Person" dense clearable outlined />
-      </v-col>
+      
     </v-row>
 
     <!-- Search bar -->
@@ -113,13 +110,11 @@ onMounted(async () => {
   }
 })
 
-
-const filterOption = ref('all'); // "category" or "people"
+const filterOption = ref('all'); // "category"
 const selectedValue = ref(null); // dropdown selection
 
 // These will power the dropdown options
 const categoryOptions = ref([]);
-const peopleOptions = ['ProfJane', 'CoachMike', 'DevJoe'];
 
 const searchQuery = ref('');
 
@@ -138,8 +133,6 @@ const filteredEvents = computed(() => {
 
   if (filterOption.value === 'category' && selectedValue.value) {
     filtered = filtered.filter(e => e.category === selectedValue.value);
-  } else if (filterOption.value === 'people' && selectedValue.value) {
-    filtered = filtered.filter(e => e.createdBy === selectedValue.value);
   }
 
   if (searchQuery.value.trim() !== '') {
@@ -186,7 +179,6 @@ const totalPages = computed(() => {
 
 watch(filterOption, async () => {
   followedLoading.value = true; // Set loading to true when filter changes
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate loading delay
   selectedValue.value = null; // reset dropdown when switching filter type
   currentPage.value = 1; // reset pagination when switching filter type
   followedLoading.value = false; // Set loading to false after data is fetched
