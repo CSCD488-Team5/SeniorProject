@@ -3,6 +3,8 @@ package com.Team5.SeniorProject.model;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +28,8 @@ public class Event {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String title;
-	private String category;
+	@Enumerated(EnumType.STRING)
+	private EventCategory category;
 	private String description;
 	private LocalDateTime time;
 	private String location;
@@ -35,4 +39,7 @@ public class Event {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User user;
+
+	@Transient
+	private boolean joined;
 }

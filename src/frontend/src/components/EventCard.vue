@@ -6,12 +6,17 @@
 
 		<v-card-subtitle class="text-caption text-grey">
 			Posted by 
-			<router-link
-				:to="{ name: 'Profile', params: { username: username } }"
-				class="clickable-username"
+			<template v-if="username">
+				<router-link
+					:to="{ name: 'Profile', params: { username: username } }"
+					class="clickable-username"
 				>
-				@{{ username }}
-			</router-link>
+					@{{ username }}
+				</router-link>
+			</template>
+			<template v-else>
+				<span class="text-grey">Unknown</span>
+			</template>
 			&mdash; {{ location }}
 		</v-card-subtitle>
 
@@ -64,6 +69,7 @@ const props = defineProps({
 	time: String,
 	imageSrc: String,
 	username: String, // Creator of the post
+	joined: Boolean
 })
 
 const computedImageSrc = computed(() => {
@@ -75,7 +81,7 @@ const computedImageSrc = computed(() => {
 })
 
 const show = ref(false)
-const joined = ref(false)
+const joined = ref(props.joined || false)
 
 
 const toggleContent = () => {
@@ -101,6 +107,7 @@ async function joinEvent() {
 			params: { username }
 		})
 		joined.value = true
+		emit('update:joined', { id: props.id, joined: true})
 	} catch (error) {
 		console.error('Join event error:', error.response);
 		alert(error.response?.data || 'Failed to join the event')
@@ -119,6 +126,7 @@ async function unjoinEvent() {
       params: { username }
     })
     joined.value = false
+	emit('update:joined', { id: props.id, joined: false})
   } catch (error) {
     console.error('Unjoin event error:', error.response)
     alert(error.response?.data || 'Failed to unjoin the event')
@@ -140,6 +148,8 @@ const formattedDate = computed(() => {
 function goToUserProfile() {
   router.push({ name: 'Profile', params: { username: props.username } });
 }
+
+const emit = defineEmits(['update:joined'])
 </script>
 
 
