@@ -62,4 +62,8 @@ public class EventService {
 
         joinedEventRepository.delete(joinEvent);
     }
+
+    public boolean isUserJoined(Long eventId, String username) {
+        return joinedEventRepository.existsByEvent_IdAndUser_Username(eventId, username);
+    }
 }
