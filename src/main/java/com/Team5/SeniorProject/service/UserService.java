@@ -2,6 +2,7 @@ package com.Team5.SeniorProject.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.Team5.SeniorProject.model.Role;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
@@ -29,7 +30,7 @@ public class UserService {
             throw new Exception("Error: Email already exists!");
         }
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setRoles(role);
+		user.setRole(Role.valueOf(role));
 		return userRepository.save(user);
 	}
 
