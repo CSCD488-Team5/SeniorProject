@@ -29,7 +29,8 @@ import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.EmailService;
-
+import com.Team5.SeniorProject.repository.JoinedEventRepository;
+import com.Team5.SeniorProject.repository.FollowRepository;
 
 @RestController
 @RequestMapping("/api/events")
@@ -49,6 +50,11 @@ public class EventController {
     @Autowired
     private JoinedEventRepository joinedEventRepository;
 
+
+    @Autowired
+    private FollowRepository followRepository;
+
+
 	@GetMapping
 	public List<Event> getAllEvents() {
 		return eventRepository.findAll();
@@ -64,8 +70,8 @@ public class EventController {
             @RequestParam("description") String description,
             // DateTime
             @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
-            @RequestParam("location") String location,
-            @RequestParam("image") MultipartFile imageFile,
+            @RequestParam("location") String location, 
+            @RequestParam("image") MultipartFile imageFile, 
             @RequestParam("username") String username) {
         try {
 
@@ -98,6 +104,11 @@ public class EventController {
             event.setUser(user);
             
             Event savedEvent = eventRepository.save(event);
+            List<User> followers = followRepository.findByFollowee_Id(user.getId())
+                .stream()
+                .map(follow -> follow.getFollower())
+                .toList();
+            emailService.sendNewEventNotification(followers, user.getUsername(), event.getTitle());
             return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -181,15 +192,25 @@ public class EventController {
             return ResponseEntity.noContent().build(); //If event does not exist.
         }
         Event event = eventRepository.findById(id).orElse(null);
-        if (event.getUser() != null) {
-            User user = event.getUser();
-            String title = event.getTitle();
-            eventRepository.deleteById(id);
-            emailService.sendEventDeletionEmail(user, title);
-            }
+        if (event == null) return ResponseEntity.notFound().build(); 
+        String title = event.getTitle();
 
+        List<JoinEvent> joinEvents = joinedEventRepository.findByEvent_Id(id);
+        List<User> participants = joinEvents.stream()
+                .map(JoinEvent::getUser)
+                .distinct()
+                .toList();
+        
+        User creator = event.getUser();
+        if (!participants.contains(creator)) {
+            participants.add(creator);
+        }
+        joinedEventRepository.deleteAll(joinEvents);
+        eventRepository.deleteById(id);
+        emailService.sendEventDeletionEmail(participants, title);
         return ResponseEntity.noContent().build();// Deletes the event.
     }
+
 
     @GetMapping("/categories")
     public ResponseEntity<List<String>> getUniqueCategories() {
@@ -219,5 +240,6 @@ public class EventController {
 
         return ResponseEntity.ok(allEvents);
     }
+
 
 }

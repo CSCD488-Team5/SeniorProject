@@ -55,6 +55,8 @@
 import { ref, computed, getCurrentInstance} from 'vue'
 import { useRouter } from 'vue-router'
 import { getUsernameFromToken } from '@/utils/jwt'
+import { onMounted } from 'vue'
+
 
 const { appContext } = getCurrentInstance()
 const axios = appContext.config.globalProperties.$http
@@ -94,6 +96,18 @@ function goToEventDetails() {
 	router.push({ name: 'EventDetails', params: { id: props.id } });
 }
 
+
+onMounted(async () => {
+	const username = getUsernameFromToken()
+	try {
+		const { data } = await axios.get(`http://localhost/api/events/${props.id}/is-joined`, {
+			params: { username }
+		})
+		joined.value = data
+	} catch (error) {
+		console.error('Error checking join status:', error.response)
+	}
+})
 
 async function joinEvent() {
 	const username = getUsernameFromToken()

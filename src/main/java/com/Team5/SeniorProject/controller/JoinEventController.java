@@ -37,4 +37,14 @@ public class JoinEventController {
         }
     }
 
+    @GetMapping("/{eventId}/is-joined")
+    public ResponseEntity<Boolean> isUserJoinedEvent(@PathVariable Long eventId, @RequestParam String username) {
+        try {
+            boolean isJoined = eventService.isUserJoined(eventId, username);
+            return ResponseEntity.ok(isJoined);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(false);
+        }
+    }
+
 }
