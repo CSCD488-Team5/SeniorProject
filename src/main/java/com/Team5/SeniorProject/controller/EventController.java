@@ -2,10 +2,12 @@ package com.Team5.SeniorProject.controller;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,18 +15,19 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.Team5.SeniorProject.model.Event;
+import com.Team5.SeniorProject.model.EventCategory;
 import com.Team5.SeniorProject.model.JoinEvent;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
+import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
 import com.Team5.SeniorProject.service.EmailService;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.FollowRepository;
@@ -47,8 +50,10 @@ public class EventController {
     @Autowired
     private JoinedEventRepository joinedEventRepository;
 
+
     @Autowired
     private FollowRepository followRepository;
+
 
 	@GetMapping
 	public List<Event> getAllEvents() {
@@ -61,7 +66,7 @@ public class EventController {
             // Category
             // Author cle
             @RequestParam("title") String title,
-            @RequestParam("category") String category,
+            @RequestParam("category") String categoryStr,
             @RequestParam("description") String description,
             // DateTime
             @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
@@ -71,6 +76,13 @@ public class EventController {
         try {
 
             User user = userRepository.findByUsername(username).orElseThrow(() ->  new RuntimeException("User was not found for upload!"));
+
+            EventCategory category;
+            try {
+                category = EventCategory.valueOf(categoryStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
 
             // Step 1: Save image to /static/images/events/
             String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
@@ -124,8 +136,7 @@ public class EventController {
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable long id,
     @RequestParam("title") String title,
-    @RequestParam("subtitle") String subtitle,
-    @RequestParam("category") String category,
+    @RequestParam("category") String categoryStr,
     @RequestParam("description") String description,
     @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
     @RequestParam("location") String location,
@@ -138,9 +149,15 @@ public class EventController {
         User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new RuntimeException("User was not found!"));
 
+        EventCategory category;
+        try {
+            category = EventCategory.valueOf(categoryStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
         //Set all attributes of the event, except Image
         event.setTitle(title);
-        event.setSubtitle(subtitle);
         event.setCategory(category);
         event.setDescription(description);
         event.setTime(LocalDateTime.parse(time));
@@ -193,5 +210,36 @@ public class EventController {
         emailService.sendEventDeletionEmail(participants, title);
         return ResponseEntity.noContent().build();// Deletes the event.
     }
+
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> getUniqueCategories() {
+        List<String> categories = Arrays.stream(EventCategory.values())
+            .map(Enum::name)
+            .toList();
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/getAllEventsForUser/{username}")
+    public ResponseEntity<List<Event>> getAllEventsForUser(@PathVariable String username) {
+        // 1. Get all events
+        List<Event> allEvents = eventRepository.findAll();
+        
+        // 2. Get the list of event IDs the user joined
+        List<JoinEvent> joinedEntries = joinedEventRepository.findByUser_Username(username);
+        Set<Long> joinedEventsIds = joinedEntries.stream()
+            .map(join -> join.getEvent().getId())
+            .collect(Collectors.toSet());
+        
+        // 3. Mark events as joined
+        for (Event event : allEvents) {
+            if (joinedEventsIds.contains(event.getId())) {
+                event.setJoined(true);
+            }
+        }
+
+        return ResponseEntity.ok(allEvents);
+    }
+
 
 }
