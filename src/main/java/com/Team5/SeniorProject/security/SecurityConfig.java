@@ -2,10 +2,12 @@ package com.Team5.SeniorProject.security;
 
 import com.Team5.SeniorProject.jwt.AuthEntryPointJwt;
 import com.Team5.SeniorProject.jwt.AuthTokenFilter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,13 +26,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 import javax.sql.DataSource;
+
 import java.util.List;
+
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled=true)
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
@@ -50,11 +54,23 @@ public class SecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .userDetailsService(userDetailsService)
+                .authenticationProvider(
+                    new DaoAuthenticationProvider() {{
+                        setUserDetailsService(userDetailsService);
+                        setPasswordEncoder(passwordEncoder());
+                    }}
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll() // Allow signup and login
                         .requestMatchers("/api/events/upload").permitAll()
                         .requestMatchers("/images/**").permitAll()
+
+                        // protect delete endpoint:
+                        .requestMatchers(HttpMethod.DELETE, "/api/events/delete/**")
+                        .authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
