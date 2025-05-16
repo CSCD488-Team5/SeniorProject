@@ -28,7 +28,22 @@ public class EmailService {
         email.setText(message);
         mailSender.send(email);
     }
+}
 
+    public void sendNewEventNotification(List<User> followers, String creatorName, String eventTitle) {
+        String subject = "New Event by " + creatorName + " - CampusHive";
+
+        for (User follower : followers) {
+            String message = "Hi " + follower.getUsername() + ",\n\n" +
+                             creatorName + " has posted a new event: \"" + eventTitle + "\".\n\n" +
+                             "Check it out on CampusHive!\n\nThanks,\nCampusHive Team";
+
+            SimpleMailMessage email = new SimpleMailMessage();
+            email.setTo(follower.getEmail());
+            email.setSubject(subject);
+            email.setText(message);
+            mailSender.send(email);
+        }
 }
 
 }

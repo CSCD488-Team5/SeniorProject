@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import com.Team5.SeniorProject.service.EmailService;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
-
+import com.Team5.SeniorProject.repository.FollowRepository;
 
 @RestController
 @RequestMapping("/api/events")
@@ -46,6 +46,9 @@ public class EventController {
 
     @Autowired
     private JoinedEventRepository joinedEventRepository;
+
+    @Autowired
+    private FollowRepository followRepository;
 
 	@GetMapping
 	public List<Event> getAllEvents() {
@@ -89,6 +92,11 @@ public class EventController {
             event.setUser(user);
             
             Event savedEvent = eventRepository.save(event);
+            List<User> followers = followRepository.findByFollowee_Id(user.getId())
+                .stream()
+                .map(follow -> follow.getFollower())
+                .toList();
+            emailService.sendNewEventNotification(followers, user.getUsername(), event.getTitle());
             return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
