@@ -6,7 +6,6 @@ import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.model.PostComments;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.model.Event;
-import com.Team5.SeniorProject.model.PostComments;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,7 @@ public class CommentService {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository; 
     }
+
     @Transactional
     public void createCommnent(Long id, String userName, String comment){
         User user = getUser(userName);
@@ -35,10 +35,12 @@ public class CommentService {
         
     }
 
+    @Transactional
     public List<PostComments> getCommentsByEventId(Long eventId){
         return commentRepository.findByEventId(eventId);
         }
 
+        
     private User getUser(String userName){
         return userRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User does not exist"));
     }
