@@ -27,7 +27,7 @@
             <v-list-item-content>
               <v-list-item-title>{{ comment.user.username }}</v-list-item-title>
               <v-list-item-subtitle>
-                {{ comment.content }}
+                {{ comment.comment }}
                 <div class="text--secondary text-caption">
                   {{ formatCommentDate(comment.created) }}
                 </div>
