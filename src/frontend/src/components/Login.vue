@@ -10,30 +10,20 @@ const password = ref('');
 const message = ref('');
 const form = ref(null);
 
-const clientId = ref('');
-const tenantId = 'common'; // ← allows ANY Microsoft account (personal + org)
-const redirectUrl = ref('');
-
-onMounted(async() => {
-  try {
-    const response = await axios.get('http://localhost/api/config/microsoft');
-    clientId.value = response.data.clientId;
-    redirectUrl.value = response.data.redirectUrl;
-  } catch (error) {
-    console.error('Error fetching Microsoft config:', error);
-  }
-});
+const clientId = import.meta.env.VITE_CAMPUSHIVE_CLIENTID;
+const tenantId = 'common';
+const redirectUrl = import.meta.env.VITE_REDIRECT_URL;
 
 
 const redirectToMicrosoftSSO = () => {
-  if (!clientId.value || !redirectUrl.value) {
-    message.value = "Microsoft SSO configuration is not set.";
-    return;
-  }
   const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}` +
               `&response_type=token` +
-              `&redirect_uri=${encodeURIComponent(redirectUrl.value)}` +
-              `&scope=openid%20profile%20email`;
+              `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
+              `&scope=openid%20profile%20email`+
+              `&prompt=select_account`;
+  console.log("Client ID:", clientId);
+  console.log("Redirect URL:", redirectUrl);
+
 
   window.location.href = url;
 };
@@ -101,6 +91,7 @@ const login = async () => {
         <v-btn
           block
           color="info"
+          class="mt-2"
           prepend-icon="mdi-microsoft"
           @click="redirectToMicrosoftSSO">
           Continue with Microsoft
