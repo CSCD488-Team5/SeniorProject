@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -35,10 +34,13 @@ public class PostComments {
 
     private String comment; 
 
-    public PostComments(Event event, User user, String comment){
+    LocalDateTime dateTime;
+
+    public PostComments(Event event, User user, String comment, LocalDateTime dateTime){
         this.event  = event;
         this.user = user;
         this.comment = comment;
+        this.dateTime = dateTime;
     }
     
     

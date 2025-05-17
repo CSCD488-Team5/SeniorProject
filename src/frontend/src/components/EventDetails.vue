@@ -22,12 +22,16 @@
       <!-- Comments Section -->
       <v-card class="pa-4 mt-6">
         <h2 class="text-h6 mb-4">Comments</h2>
-        <v-list two-line>
+        <v-list>
           <v-list-item v-for="comment in comments" :key="comment.id">
             <v-list-item-content>
-              <v-list-item-title>{{ comment.user.username }}</v-list-item-title>
-              <v-list-item-subtitle>
+              <!-- Display comment text as bold -->
+              <v-list-item-title class="font-weight-bold">
                 {{ comment.comment }}
+              </v-list-item-title>
+              <!-- Display username below comment -->
+              <v-list-item-subtitle class="subtitle-2 font-weight-medium">
+                Post by: {{ comment.user.username }}
                 <div class="text--secondary text-caption">
                   {{ formatCommentDate(comment.created) }}
                 </div>
@@ -130,5 +134,8 @@ onMounted(async () => {
 }
 .mt-6 {
   margin-top: 1.5rem;
+}
+.font-weight-bold {
+  font-weight: bold;
 }
 </style>
