@@ -8,9 +8,11 @@ import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.model.Event;
 
 import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class CommentService {
@@ -26,13 +28,13 @@ public class CommentService {
     }
 
     @Transactional
-    public void createCommnent(Long id, String userName, String comment){
+    public void createCommnent(Long id, String userName, String comment, String timestamp){
         User user = getUser(userName);
         Event event = getEvent(id);
+        LocalDateTime timeStamp = parseTimeStamp(timestamp);
 
-        PostComments postComment = new PostComments(event, user, comment);
+        PostComments postComment = new PostComments(event, user, comment, timeStamp);
         commentRepository.save(postComment);
-        
     }
 
     @Transactional
@@ -47,6 +49,12 @@ public class CommentService {
 
     private Event getEvent(Long id){
         return eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event does not exist!"));
+    }
+
+    private LocalDateTime parseTimeStamp(String timestamp){
+        LocalDateTime timeStamp = LocalDateTime.parse(timestamp);
+
+        return timeStamp;
     }
     
 }

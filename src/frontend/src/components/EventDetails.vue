@@ -24,24 +24,17 @@
         <h2 class="text-h6 mb-4">Comments</h2>
         <v-list>
           <v-list-item v-for="comment in comments" :key="comment.id">
-            <v-list-item-content>
               <!-- Display comment text as bold -->
               <v-list-item-title class="font-weight-bold">
                 {{ comment.comment }}
               </v-list-item-title>
               <!-- Display username below comment -->
               <v-list-item-subtitle class="subtitle-2 font-weight-medium">
-                Post by: {{ comment.user.username }}
-                <div class="text--secondary text-caption">
-                  {{ formatCommentDate(comment.created) }}
-                </div>
+                Post by: {{ comment.user.username }}, {{ formatCommentDate(comment.timeStamp) }}
               </v-list-item-subtitle>
-            </v-list-item-content>
           </v-list-item>
           <v-list-item v-if="comments.length === 0">
-            <v-list-item-content>
               <v-list-item-title>No comments yet.</v-list-item-title>
-            </v-list-item-content>
           </v-list-item>
         </v-list>
 
@@ -93,14 +86,18 @@ async function fetchEvent() {
 
 // Fetch comments
 async function fetchComments() {
-  const { data } = await axios.get(`/api/comments/${eventId}`)
-  comments.value = data
+  const { data } = await axios.get(`/api/comments/${eventId}`);
+  console.log("RAW COMMENTS JSON:", data);
+  comments.value = data;
 }
 
 // Submit a new comment
 async function submitComment() {
+  const now = new Date().toISOString().slice(0,19);//Formats the time stamp
+  
   await axios.post(`/api/comments/${eventId}/postComment`, {
-    comment: newComment.value
+    comment: newComment.value,
+    timeStamp: now
   })
   newComment.value = ''
   await fetchComments()

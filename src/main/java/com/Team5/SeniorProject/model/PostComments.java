@@ -2,6 +2,8 @@ package com.Team5.SeniorProject.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,13 +36,14 @@ public class PostComments {
 
     private String comment; 
 
-    LocalDateTime dateTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    LocalDateTime timeStamp;
 
     public PostComments(Event event, User user, String comment, LocalDateTime dateTime){
         this.event  = event;
         this.user = user;
         this.comment = comment;
-        this.dateTime = dateTime;
+        this.timeStamp = dateTime;
     }
     
     

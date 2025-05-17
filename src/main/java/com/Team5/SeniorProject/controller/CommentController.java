@@ -41,8 +41,9 @@ public class CommentController {
 
         String userName = principal.getName();
         String comment = payload.get("comment");
+        String timeStamp = payload.get("timeStamp");
 
-        commentService.createCommnent(id, userName, comment);
+        commentService.createCommnent(id, userName, comment, timeStamp);
         return ResponseEntity.ok().build(); 
     }
     
