@@ -47,3 +47,6 @@ target/
 .DS_Store
 src/frontend/node/npm
 src/main/resources/static
+
+# Ignore secrets file
+src/main/resources/application-secrets.properties
