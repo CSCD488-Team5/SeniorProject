@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "postComments")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class PostComments {
 
     @Id
@@ -33,7 +32,14 @@ public class PostComments {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDateTime joined = LocalDateTime.now();
+
+    private String comment; 
+
+    public PostComments(Event event, User user, String comment){
+        this.event  = event;
+        this.user = user;
+        this.comment = comment;
+    }
     
     
 }
