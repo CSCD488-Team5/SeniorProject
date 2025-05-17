@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import java.security.Principal;
 
@@ -35,10 +34,6 @@ public class CommentController {
 
     @Autowired
     private CommentService commentService;
-    @Autowired
-    private EventRepository eventRepository;
-    @Autowired
-    private UserRepository userRepository;
 
 
     //Get the comments for the post
@@ -47,21 +42,13 @@ public class CommentController {
         return commentService.getCommentsByEventId(id);
     }
 
-    
     @PostMapping("/{eventid}/postComment")
     public ResponseEntity<Void> postComment (@PathVariable ("eventid") Long id, @RequestBody Map<String, String> payload, Principal principal){
 
         String userName = principal.getName();
-        String commen = payload.get("comment");
-        
-        User user = userRepository.findByUsername(userName).orElseThrow(() ->  new RuntimeException("User was not found for upload!"));
+        String comment = payload.get("comment");
 
-        Event event = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found!"));
-
-        PostComments postComment = new PostComments(event, user, commen);
-
-        commentService.createComment(postComment);
-
+        commentService.createCommnent(id, userName, comment);
         return ResponseEntity.ok().build(); 
     }
     
