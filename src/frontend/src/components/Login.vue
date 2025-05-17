@@ -10,14 +10,29 @@ const password = ref('');
 const message = ref('');
 const form = ref(null);
 
-const clientId = import.meta.env.VITE_MICROSOFT_CLIENT_ID;
+const clientId = ref('');
 const tenantId = 'common'; // ← allows ANY Microsoft account (personal + org)
-const redirectUri = 'http://localhost:5173/oauth-callback';
+const redirectUrl = ref('');
+
+onMounted(async() => {
+  try {
+    const response = await axios.get('http://localhost/api/config/microsoft');
+    clientId.value = response.data.clientId;
+    redirectUrl.value = response.data.redirectUrl;
+  } catch (error) {
+    console.error('Error fetching Microsoft config:', error);
+  }
+});
+
 
 const redirectToMicrosoftSSO = () => {
+  if (!clientId.value || !redirectUrl.value) {
+    message.value = "Microsoft SSO configuration is not set.";
+    return;
+  }
   const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}` +
               `&response_type=token` +
-              `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+              `&redirect_uri=${encodeURIComponent(redirectUrl.value)}` +
               `&scope=openid%20profile%20email`;
 
   window.location.href = url;
