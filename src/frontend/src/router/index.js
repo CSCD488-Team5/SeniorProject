@@ -1,11 +1,10 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router'; // ✅ changed from createWebHashHistory
 import Login from '../components/Login.vue';
 import Signup from '../components/Signup.vue';
 import PostPage from "@/components/PostPage.vue";
-import { isTokenValid } from '../utils/jwt'
+import { isTokenValid } from '../utils/jwt';
 import Home from "@/components/Home.vue";
 import EventDetails from "@/components/EventDetails.vue";
-
 
 const routes = [
   { path: "/Login", name: "Login", component: Login },
@@ -22,7 +21,7 @@ const routes = [
       }
     },
   },
-  { path: "/", redirect: "/Signup" }, // Redirect root to /Signup
+  { path: "/", redirect: "/Signup" },
   { path: "/Home", name: "Home", component: Home },
   { path: "/Events/:id", name: "EventDetails", component: EventDetails },
   {
@@ -30,10 +29,15 @@ const routes = [
     name: "Profile",
     component: () => import("@/components/Profile.vue"),
   },
+  {
+    path: "/oauth-callback",
+    name: "OAuthCallback",
+    component: () => import("@/components/OAuthCallback.vue"),
+  },
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(), // Ensures the browser doesn't break on refresh
+  history: createWebHistory(), // ✅ updated to use standard history
   routes,
 });
 

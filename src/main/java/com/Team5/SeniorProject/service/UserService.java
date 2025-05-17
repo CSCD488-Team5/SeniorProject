@@ -22,17 +22,17 @@ public class UserService {
 		this.eventRepository = eventRepository;
 	}
 
-	public User signup(User user, String role) throws Exception {
-		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-			throw new Exception("Error: Username already exists!");
-		}
-		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new Exception("Error: Email already exists!");
-        }
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setRole(Role.valueOf(role));
-		return userRepository.save(user);
-	}
+	// public User signup(User user, String role) throws Exception {
+	// 	if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+	// 		throw new Exception("Error: Username already exists!");
+	// 	}
+	// 	if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+    //         throw new Exception("Error: Email already exists!");
+    //     }
+	// 	user.setPassword(passwordEncoder.encode(user.getPassword()));
+	// 	user.setRole(Role.valueOf(role));
+	// 	return userRepository.save(user);
+	// }
 
 	public boolean existsByUsername(String username) {
         return userRepository.findByUsername(username).isPresent();
@@ -46,5 +46,21 @@ public class UserService {
 		});
 	}
 
+	public User signup(User user, String role) throws Exception {
+		if (user.getUsername() != null && userRepository.findByUsername(user.getUsername()).isPresent()) {
+			throw new Exception("Error: Username already exists!");
+		}
+		if (user.getEmail() != null && userRepository.findByEmail(user.getEmail()).isPresent()) {
+			throw new Exception("Error: Email already exists!");
+		}
+	
+		// Only encode password if it's non-null and not empty (i.e., not an SSO user)
+		if (user.getPassword() != null && !user.getPassword().isBlank()) {
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+		}
+	
+		user.setRole(Role.valueOf(role));
+		return userRepository.save(user);
+	}
 	
 }
