@@ -42,6 +42,22 @@ public class CommentService {
         return commentRepository.findByEventId(eventId);
         }
 
+
+    @Transactional
+    public void deleteComment(String username, Long commentId){
+        PostComments comment = getPostComment(commentId);
+        User user = getUser(username);
+
+        //Check to see if the the owner is deleting the comment
+        if (comment.getUser() == user){
+            commentRepository.delete(comment);
+        }else {
+            throw new  RuntimeException("Only author can delete the comment!");
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------
+    //Helper Methods
         
     private User getUser(String userName){
         return userRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User does not exist"));
@@ -55,6 +71,10 @@ public class CommentService {
         LocalDateTime timeStamp = LocalDateTime.parse(timestamp);
 
         return timeStamp;
+    }
+
+    private PostComments getPostComment(Long id){
+        return commentRepository.findById(id).orElseThrow(() -> new RuntimeException("This post does not exist"));
     }
     
 }

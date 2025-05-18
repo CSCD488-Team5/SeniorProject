@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import java.security.Principal;
 
 import com.Team5.SeniorProject.service.CommentService;
@@ -42,9 +43,16 @@ public class CommentController {
         String userName = principal.getName();
         String comment = payload.get("comment");
         String timeStamp = payload.get("timeStamp");
-
         commentService.createCommnent(id, userName, comment, timeStamp);
         return ResponseEntity.ok().build(); 
+    }
+
+    @DeleteMapping("/{commentid}/deleteComment")
+    public ResponseEntity<Void> deleteComment(@PathVariable ("commentid") Long commentId, Principal principal){
+
+        String userName = principal.getName();
+        commentService.deleteComment(userName, commentId);
+        return ResponseEntity.ok().build();
     }
     
 }

@@ -23,8 +23,9 @@
       <v-card class="pa-4 mt-6">
         <h2 class="text-h6 mb-4">Comments</h2>
         <v-list>
-          <v-list-item v-for="comment in comments" :key="comment.id">
-              <!-- Display comment text as bold -->
+          
+          <v-list-item v-for="comment in comments" :key="comment.id" class="d-flex justify-space-between align-center">
+
               <v-list-item-title class="font-weight-bold">
                 {{ comment.comment }}
               </v-list-item-title>
@@ -32,6 +33,13 @@
               <v-list-item-subtitle class="subtitle-2 font-weight-medium">
                 Post by: {{ comment.user.username }}, {{ formatCommentDate(comment.timeStamp) }}
               </v-list-item-subtitle>
+
+              <v-list-item-action v-if="currentUser && comment.user.username == currentUser">
+                <v-btn icon small text class="pa-1" @click="deleteComment(comment.id)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </v-list-item-action>
+
           </v-list-item>
           <v-list-item v-if="comments.length === 0">
               <v-list-item-title>No comments yet.</v-list-item-title>
@@ -64,6 +72,7 @@
 import { ref, onMounted, computed, getCurrentInstance } from 'vue'
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
+import {getUsernameFromToken} from "@/utils/jwt.js";
 
 const route = useRoute()
 const eventId = route.params.id
@@ -73,8 +82,9 @@ const eventData = ref(null)
 // Comments data
 const comments = ref([])
 const newComment = ref('')
+//grabs the current user
+const currentUser = ref(null);
 
-// Axios instance
 const { appContext } = getCurrentInstance()
 const axios = appContext.config.globalProperties.$http
 
@@ -82,6 +92,11 @@ const axios = appContext.config.globalProperties.$http
 async function fetchEvent() {
   const { data } = await axios.get(`/api/events/${eventId}`)
   eventData.value = data
+}
+
+async function fetchCurrentUser(){
+    const username = getUsernameFromToken();
+    currentUser.value = username;
 }
 
 // Fetch comments
@@ -103,6 +118,12 @@ async function submitComment() {
   await fetchComments()
 }
 
+//Delete a comment
+async function deleteComment(commentid) {
+  await axios.delete(`/api/comments/${commentid}/deleteComment`)
+  await fetchComments(); 
+}
+
 // Format comment timestamp
 function formatCommentDate(dateStr) {
   return dayjs(dateStr).format('MMM D, YYYY h:mm A')
@@ -120,6 +141,7 @@ const formattedImageSrc = computed(() => {
 
 // On mount, fetch both event and comments
 onMounted(async () => {
+  await fetchCurrentUser()
   await fetchEvent()
   await fetchComments()
 })
