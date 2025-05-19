@@ -62,5 +62,18 @@ public class UserService {
 		user.setRole(Role.valueOf(role));
 		return userRepository.save(user);
 	}
+
+	public User findOrCreateMicrosoftUser(String email, String name) {
+		return userRepository.findByEmail(email).orElseGet(() -> {
+			User newUser = new User();
+			newUser.setEmail(email);
+			newUser.setUserName(email.split("@")[0]);
+			newUser.setName(name);
+			newUser.setPassword("");
+			newUser.setRole(Role.USER);
+			newUser.setEnabled(true);
+			return userRepository.save(newUser);
+		});
+ 	}
 	
 }

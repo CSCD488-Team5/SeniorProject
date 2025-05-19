@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import TokenService from '@/scripts/TokenService'
 
 const router = useRouter()
-
+// Get token from URL hash
 onMounted(async () => {
   const hashParams = new URLSearchParams(window.location.hash.slice(1))
   const accessToken = hashParams.get('access_token')
@@ -20,7 +20,7 @@ onMounted(async () => {
         headers: { Authorization: `Bearer ${accessToken}` }
       })
 
-      // Send user info to backend to create JWT and user if needed
+      // Send user info to backend to create JWT token
       const response = await axios.post('http://localhost/api/auth/oauth/microsoft', userInfo.data)
 
       const { token } = response.data

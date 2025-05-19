@@ -80,44 +80,18 @@ public class SignupController {
 
 	@PostMapping("/oauth/microsoft")
 public ResponseEntity<?> microsoftSSO(@RequestBody Map<String, Object> profile) {
-    System.out.println("⚠️ Microsoft SSO hit");
-
+    // Extract email and name from the profile
     String email = (String) profile.get("email");
     String name = (String) profile.get("name");
 
-    System.out.println("Received profile: " + profile);
     if (email == null || name == null) {
         return ResponseEntity.badRequest().body("Invalid profile data");
     }
-
-    boolean isNewUser;
-    User user;
-
-    Optional<User> existing = userRepository.findByEmail(email);
-    if (existing.isPresent()) {
-        user = existing.get();
-        isNewUser = false;
-    } else {
-        User newUser = new User();
-        newUser.setEmail(email);
-        newUser.setUserName(email.split("@")[0]); // fallback username
-        newUser.setName(name);
-        newUser.setPassword(""); // Not used
-        newUser.setRole(Role.USER);
-        newUser.setEnabled(true);
-
-        user = userRepository.save(newUser);
-        isNewUser = true;
-        System.out.println("✅ New user created: " + email);
-    }
-
+	// Check if the user already exists
+	User user = userService.findOrCreateMicrosoftUser(email, name);
     String jwt = jwtUtils.generateTokenFromUsername(user.getUsername());
-    System.out.println("✅ Issued JWT: " + jwt);
 
-    return ResponseEntity.ok(Map.of(
-        "token", jwt,
-        "newUser", isNewUser
-    ));
+    return ResponseEntity.ok(Map.of("token", jwt));
 }
 
 
