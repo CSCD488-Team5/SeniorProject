@@ -4,7 +4,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.UserService;
 
 @Component
@@ -26,7 +25,7 @@ public class UserInitializer implements CommandLineRunner {
 			admin.setEmail("admin@gmail.com");
 			admin.setPassword("password"); // This will be encoded in the service
 			admin.setUserName("admin");
-			userService.signup(admin, "ADMIN");
+			userService.signup(admin, Role.ADMIN.name());
 			System.out.println("Admin account initialized.");
 		}
 
@@ -37,7 +36,7 @@ public class UserInitializer implements CommandLineRunner {
 			user1.setEmail("alice@example.com");
 			user1.setPassword("password");
 			user1.setUserName("alice");
-			userService.signup(user1, "USER");
+			userService.signup(user1, Role.USER.name());
 			System.out.println("User 'alice' created.");
 		}
 
@@ -48,7 +47,7 @@ public class UserInitializer implements CommandLineRunner {
 			user2.setEmail("bob@example.com");
 			user2.setPassword("password");
 			user2.setUserName("bob");
-			userService.signup(user2, "USER");
+			userService.signup(user2, Role.USER.name());
 			System.out.println("User 'bob' created.");
 		}
 	}

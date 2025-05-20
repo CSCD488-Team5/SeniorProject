@@ -12,7 +12,16 @@
           <v-text-field v-model="form.title" label="Title"  :rules="[requiredRule]"/>
           <v-text-field v-model="form.subtitle" label="Subtitle" :rules="[requiredRule]" />
           <v-textarea v-model="form.description" label="Description" :rules="[requiredRule]" />
-          <v-text-field v-model="form.category" label="Category" :rules="[requiredRule]" />
+          
+          <v-select
+            v-model="form.category"
+            :items="categories"
+            label="Category"
+            :rules="[requiredRule]"
+            outlined
+            dense
+            clearable></v-select>
+
           <v-text-field v-model="form.location" label="Location" :rules="[requiredRule]" />
 
           <!-- Date Picker -->
@@ -255,30 +264,16 @@ const handleEdit = (post) => {
   // 3) open the modal
   showModal.value = true
 };
-/*
-const onImageSelected = (files) => {
-  const file = Array.isArray(files) ? files[0] : files;
-  if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    form.value.imageBase64 = reader.result;
-    console.log("✅ Image encoded:", form.value.imageBase64.slice(0, 50), "..."); // preview
-  };
-  reader.readAsDataURL(file);
-};
-*/
+// Categories state and fetch
+const categories = ref([])
 
-/*
-watch(() => form.value.image, (file) => {
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    form.value.imageUrl = reader.result;
-    console.log("✅ Encoded image:", reader.result.slice(0, 50), "...");
-  };
-  reader.readAsDataURL(file);
-});
-*/
+onMounted(async () => {
+  try {
+    const response = await axios.get("api/events/categories")
+    categories.value = response.data
+  } catch (error) {
+    console.error("Error loading categories: ", error)
+  }
+})
 </script>

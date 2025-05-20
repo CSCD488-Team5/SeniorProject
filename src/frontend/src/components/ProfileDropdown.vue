@@ -51,8 +51,13 @@ const submitChangePassword = async () => {
 // Sign out logic
 const signOut = () => {
   localStorage.removeItem("token")
-  emit("logout")
-  router.push("/Login")
+  snackbarMessage.value = "Logged out successfully!"
+  snackbar.value = true
+
+  setTimeout(() => {
+    emit("logout")
+    router.push("/Login")
+  }, 800)
 }
 
 

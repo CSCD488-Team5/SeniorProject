@@ -2,6 +2,8 @@ package com.Team5.SeniorProject.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,20 +29,21 @@ public class User {
 	@Column(unique = true, nullable = false)
 	private String username;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String roles;
+	private Role role = Role.USER; // default role
 
 	@Column(nullable = false)
 	private boolean enabled = true; // Added with default value
 
 	public User() {}
 
-	public User(String name, String username, String email, String password, String roles) {
+	public User(String name, String username, String email, String password, Role role) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.username = username;
-		this.roles = roles;
+		this.role = role;
 		this.enabled = true; // Default in constructor too
 	}
 
@@ -60,8 +63,12 @@ public class User {
 	public void setUserName(String userName) {this.username = userName;}
 
 
-	public String getRoles() { return roles; }
-	public void setRoles(String roles) { this.roles = roles; }
+	public Role getRole() {
+		return this.role;
+	}
+	public void setRole(Role role) {
+		this.role = role;
+	}
 
 	public boolean isEnabled() { return enabled; }
 	public void setEnabled(boolean enabled) { this.enabled = enabled; }
