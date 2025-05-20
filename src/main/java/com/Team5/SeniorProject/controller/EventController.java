@@ -30,7 +30,6 @@ import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.EmailService;
-import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.FollowRepository;
 
 @RestController
@@ -137,7 +136,7 @@ public class EventController {
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable long id,
     @RequestParam("title") String title,
-    @RequestParam("category") String category,
+    @RequestParam("category") String categoryStr,
     @RequestParam("description") String description,
     @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
     @RequestParam("location") String location,

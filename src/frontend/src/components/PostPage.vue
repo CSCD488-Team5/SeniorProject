@@ -1,6 +1,6 @@
 <template>
   <!-- Create Post Button -->
-  <v-btn color="primary" @click="showModal = true">Create New Post</v-btn>
+  <v-btn color="primary" @click="openCreateModal">Create New Post</v-btn>
 
   <!-- Modal Popup -->
   <v-dialog v-model="showModal" max-width="500px">
@@ -10,7 +10,6 @@
       <v-card-text>
         <v-form ref="postForm" @submit.prevent="submitPost">
           <v-text-field v-model="form.title" label="Title"  :rules="[requiredRule]"/>
-          <v-text-field v-model="form.subtitle" label="Subtitle" :rules="[requiredRule]" />
           <v-textarea v-model="form.description" label="Description" :rules="[requiredRule]" />
           
           <v-select
@@ -90,7 +89,6 @@
 
               <v-card-text>
                 <h2 class="text-h6 text-primary">{{ post.title }}</h2>
-                {{ post.subtitle }}
               </v-card-text>
 
               <v-overlay
@@ -139,7 +137,6 @@ const isEditing = ref(false);
 const selectedPostId = ref(null);
 const form = ref({
   title: "",
-  subtitle: "",
   description: "",
   category: "",
   location: "",
@@ -186,47 +183,50 @@ onMounted(fetchPosts);
 const submitPost = async () => {
   const username = getUsernameFromToken();
   const { valid } = await postForm.value.validate();
-  if (!valid) return;
-  if (!form.value.date || !form.value.time) return;
+  if (!valid || !form.value.date || !form.value.time) return;
 
-  const toIsoString = (date, time) => {
-    const yyyyMMdd = new Date(date).toISOString().split("T")[0];
-    return `${yyyyMMdd}T${time}`;
-  };
-  const dateTime = toIsoString(form.value.date, form.value.time);
+  let formattedDate = form.value.date;
+  let formattedTime = form.value.time;
+
+// Format them if they are Date objects
+if (form.value.date instanceof Date) {
+  formattedDate = formatDateToISO(form.value.date);
+}
+if (form.value.time instanceof Date) {
+  formattedTime = formatTimeToHHMM(form.value.time);
+}
+
+const dateTime = `${formattedDate}T${formattedTime}:00`; // ✅ Now it's guaranteed safe
 
   const formData = new FormData();
   formData.append("title", form.value.title);
-  formData.append("subtitle", form.value.subtitle);
   formData.append("description", form.value.description);
   formData.append("category", form.value.category);
   formData.append("location", form.value.location);
   formData.append("time", dateTime);
   formData.append("username", username);
- //This statement is for the editing post
-  if(form.value.image){
+
+  if (form.value.image) {
     formData.append("image", form.value.image);
   }
 
   try {
-
-    if(isEditing.value && selectedPostId.value){
-      const response = await axios.put(`http://localhost/api/events/update/${selectedPostId.value}`, formData,);
-
-      }else {
-      const response = await axios.post("http://localhost/api/events/upload", formData,);
+    let response;
+    if (isEditing.value && selectedPostId.value) {
+      response = await axios.put(`http://localhost/api/events/update/${selectedPostId.value}`, formData);
+    } else {
+      response = await axios.post("http://localhost/api/events/upload", formData);
     }
-    //Reset states and refresh
-    showModal.value = false;
-    isEditing.value = false;
-    selectedPostId.value = null;
-    setTimeout(async () => {
-    await fetchPosts();
-}, 500); // give backend time to save the image
 
+    // Reset form + refresh
+    openCreateModal(); // will reset form + flags
+    showModal.value = false;
+    await new Promise(resolve => setTimeout(resolve, 500));
+    await fetchPosts();
+    return response.data;
   } catch (error) {
-    console.error("Error creating post:", error);
-    alert("Post was not created");
+    console.error("Error submitting post:", error);
+    alert("Failed to submit post.");
   }
 };
 
@@ -247,7 +247,6 @@ const handleEdit = (post) => {
 
   // 2) pre-fill the form
   form.value.title       = post.title
-  form.value.subtitle    = post.subtitle
   form.value.description = post.description
   form.value.category    = post.category
   form.value.location    = post.location
@@ -263,6 +262,8 @@ const handleEdit = (post) => {
 
   // 3) open the modal
   showModal.value = true
+
+
 };
 
 // Categories state and fetch
@@ -276,4 +277,35 @@ onMounted(async () => {
     console.error("Error loading categories: ", error)
   }
 })
+
+const openCreateModal = () => {
+  // Reset form and editing state
+  form.value = {
+    title: "",
+    description: "",
+    category: "",
+    location: "",
+    date: "",
+    time: "",
+    image: null,
+    imageUrl: "",
+  };
+  isEditing.value = false;
+  selectedPostId.value = null;
+  showModal.value = true;
+};
+
+function formatDateToISO(dateObj) {
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatTimeToHHMM(dateObj) {
+  const hours = String(dateObj.getHours()).padStart(2, '0');
+  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
 </script>
