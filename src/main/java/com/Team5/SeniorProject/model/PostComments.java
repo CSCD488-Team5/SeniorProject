@@ -2,32 +2,27 @@ package com.Team5.SeniorProject.model;
 
 import java.time.LocalDateTime;
 
-import org.springframework.cglib.core.Local;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-
 @Entity
-@Table(name = "registrationsJ", uniqueConstraints = @UniqueConstraint(columnNames = {"event_id","user_id"}))
+@Table(name = "postComments")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-public class JoinEvent {
+public class PostComments {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -38,5 +33,18 @@ public class JoinEvent {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDateTime joined = LocalDateTime.now();   
+
+    private String comment; 
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    LocalDateTime timeStamp;
+
+    public PostComments(Event event, User user, String comment, LocalDateTime dateTime){
+        this.event  = event;
+        this.user = user;
+        this.comment = comment;
+        this.timeStamp = dateTime;
+    }
+    
+    
 }

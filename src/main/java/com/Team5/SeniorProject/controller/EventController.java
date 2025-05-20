@@ -137,7 +137,7 @@ public class EventController {
     @PutMapping("update/{id}")
     public ResponseEntity<?> updateEvent(@PathVariable long id,
     @RequestParam("title") String title,
-    @RequestParam("category") String categoryStr,
+    @RequestParam("category") String category,
     @RequestParam("description") String description,
     @RequestParam("time") String time, // ISO-8601 format, e.g., 2023-12-25T15:00:00
     @RequestParam("location") String location,
