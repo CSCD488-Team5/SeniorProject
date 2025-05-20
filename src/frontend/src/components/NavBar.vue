@@ -56,6 +56,7 @@ function toggleTheme() {
     <v-spacer></v-spacer>
     <v-btn text to="/Home">Home</v-btn>
     <v-btn text to="/PostPage">Posts</v-btn>
+    <v-btn text href="https://outlook.office.com/calendar/view/month" target="_blank">Calendar</v-btn>
     <v-btn v-if="!username" text to="/Login">Login</v-btn>
     <ProfileDropdown v-if="username" :username="username" @logout="handleLogout" />
 

@@ -7,8 +7,10 @@ import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -38,6 +40,7 @@ public class UserService {
         return userRepository.findByUsername(username).isPresent();
     }
 
+	
 	public void deleteUserByUsername(String username) {
 		userRepository.findByUsername(username).ifPresent(user -> {
 			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));
