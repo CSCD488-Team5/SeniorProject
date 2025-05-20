@@ -52,7 +52,9 @@
           :time="event.time"
           :username="event.user?.username"
           :joined="event.joined" 
-          @update:joined="updateJoinedStatus"/>
+          @update:joined="updateJoinedStatus"
+          :isAdmin="isAdmin"
+          @event-deleted="(id) => allEvents = allEvents.filter(e => e.id !== id)"/>
         </v-col>
       </v-row>
 
@@ -84,7 +86,7 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance, computed, watch } from 'vue';
 import EventCard from './EventCard.vue';
-import { getUsernameFromToken } from '@/utils/jwt'
+import { getUsernameFromToken, isAdminFromToken } from '@/utils/jwt'
 
 const allEvents = ref([]);
 
@@ -196,6 +198,11 @@ function updateJoinedStatus({ id, joined }) {
   const target = allEvents.value.find(e => e.id === id)
   if (target) target.joined = joined
 }
+
+// const isAdmin = computed(() => isAdminFromToken());
+const isAdmin = ref(true)
+
+
 </script>
 
 
