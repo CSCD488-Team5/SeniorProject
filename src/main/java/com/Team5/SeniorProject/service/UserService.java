@@ -7,8 +7,10 @@ import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -22,22 +24,23 @@ public class UserService {
 		this.eventRepository = eventRepository;
 	}
 
-	public User signup(User user, String role) throws Exception {
-		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-			throw new Exception("Error: Username already exists!");
-		}
-		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new Exception("Error: Email already exists!");
-        }
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setRole(Role.valueOf(role));
-		return userRepository.save(user);
-	}
+	// public User signup(User user, String role) throws Exception {
+	// 	if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+	// 		throw new Exception("Error: Username already exists!");
+	// 	}
+	// 	if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+    //         throw new Exception("Error: Email already exists!");
+    //     }
+	// 	user.setPassword(passwordEncoder.encode(user.getPassword()));
+	// 	user.setRole(Role.valueOf(role));
+	// 	return userRepository.save(user);
+	// }
 
 	public boolean existsByUsername(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
 
+	
 	public void deleteUserByUsername(String username) {
 		userRepository.findByUsername(username).ifPresent(user -> {
 			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));
@@ -46,5 +49,34 @@ public class UserService {
 		});
 	}
 
+	public User signup(User user, String role) throws Exception {
+		if (user.getUsername() != null && userRepository.findByUsername(user.getUsername()).isPresent()) {
+			throw new Exception("Error: Username already exists!");
+		}
+		if (user.getEmail() != null && userRepository.findByEmail(user.getEmail()).isPresent()) {
+			throw new Exception("Error: Email already exists!");
+		}
+	
+		// Only encode password if it's non-null and not empty (i.e., not an SSO user)
+		if (user.getPassword() != null && !user.getPassword().isBlank()) {
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+		}
+	
+		user.setRole(Role.valueOf(role));
+		return userRepository.save(user);
+	}
+
+	public User findOrCreateMicrosoftUser(String email, String name) {
+		return userRepository.findByEmail(email).orElseGet(() -> {
+			User newUser = new User();
+			newUser.setEmail(email);
+			newUser.setUserName(email.split("@")[0]);
+			newUser.setName(name);
+			newUser.setPassword("");
+			newUser.setRole(Role.USER);
+			newUser.setEnabled(true);
+			return userRepository.save(newUser);
+		});
+ 	}
 	
 }
