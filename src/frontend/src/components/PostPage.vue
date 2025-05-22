@@ -50,9 +50,9 @@
               :rules="[requiredRule, datetimeRule]"
             />
             <v-file-input
+              v-model="form.image"
               label="Upload Image"
               accept="image/*"
-              @change="handleFileChange"
               prepend-icon="mdi-image"
             />
           </v-card-text>
@@ -166,16 +166,17 @@ const submitForm = async () => {
     formData.append('image', form.value.image)
   }
 
+  // 📋 DEBUG: inspect everything
+  for (let [key, v] of formData.entries()) {
+    console.log(key, v)
+  }
+
   try {
     if (isEditing.value) {
-      await axios.put(`/api/events/update/${editingId.value}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      await axios.put(`/api/events/update/${editingId.value}`, formData)
     } else {
 
-      await axios.post('/api/events/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      await axios.post('/api/events/upload', formData)
     }
 
     await loadEvents()
