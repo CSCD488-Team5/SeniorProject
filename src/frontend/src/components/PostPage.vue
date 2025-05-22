@@ -5,7 +5,7 @@
     <v-row>
       <v-col v-for="event in events" :key="event.id" cols="12" md="6" lg="4">
         <v-card>
-          <v-img :src="getImageUrl(event.imageUrl)" height="200px" cover></v-img>
+          <v-img :src="event.imageUrl" height="200px" cover></v-img>
           <v-card-title>{{ event.title }}</v-card-title>
           <v-card-subtitle>
             {{ event.location }} — {{ formatDate(event.time) }}
@@ -54,6 +54,7 @@
               label="Upload Image"
               accept="image/*"
               prepend-icon="mdi-image"
+              :rules="[imageRule]"
             />
           </v-card-text>
           <v-card-actions>
@@ -83,6 +84,7 @@ const editingId = ref(null)
 
 const requiredRule = (v) => !!v || 'This field is required'
 const datetimeRule = (v) => !!v && !isNaN(Date.parse(v)) || 'Invalid date/time'
+const imageRule = (file) => isEditing.value || (file instanceof File) || 'Image is required'
 
 const form = ref({
   title: '',
@@ -96,8 +98,6 @@ const form = ref({
 const handleFileChange = (files) => {
   form.value.image = files?.[0] || null
 }
-
-const getImageUrl = (path) => `http://localhost${path}`
 
 // Format date to readable format
 const formatDate = (datetimeStr) => {
