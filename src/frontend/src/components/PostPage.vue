@@ -1,311 +1,210 @@
 <template>
-  <!-- Create Post Button -->
-  <v-btn color="primary" @click="openCreateModal">Create New Post</v-btn>
+  <v-container>
+    <v-btn color="primary" @click="openCreateDialog">Create New Event</v-btn>
 
-  <!-- Modal Popup -->
-  <v-dialog v-model="showModal" max-width="500px">
-    <v-card>
-      <v-card-title>Create New Post</v-card-title>
+    <v-row>
+      <v-col v-for="event in events" :key="event.id" cols="12" md="6" lg="4">
+        <v-card>
+          <v-img :src="getImageUrl(event.imageUrl)" height="200px" cover></v-img>
+          <v-card-title>{{ event.title }}</v-card-title>
+          <v-card-subtitle>
+            {{ event.location }} — {{ formatDate(event.time) }}
+          </v-card-subtitle>
+          <v-card-text>{{ event.description }}</v-card-text>
+          <v-card-actions>
+            <v-btn @click="editEvent(event)">Edit</v-btn>
+            <v-btn color="error" @click="deleteEvent(event.id)">Delete</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
 
-      <v-card-text>
-        <v-form ref="postForm" @submit.prevent="submitPost">
-          <v-text-field v-model="form.title" label="Title"  :rules="[requiredRule]"/>
-          <v-textarea v-model="form.description" label="Description" :rules="[requiredRule]" />
-          
-          <v-select
-            v-model="form.category"
-            :items="categories"
-            label="Category"
-            :rules="[requiredRule]"
-            outlined
-            dense
-            clearable></v-select>
-
-          <v-text-field v-model="form.location" label="Location" :rules="[requiredRule]" />
-
-          <!-- Date Picker -->
-          <v-menu v-model="dateMenu" transition="scale-transition" offset-y>
-            <template v-slot:activator="{ props }">
-              <v-text-field v-bind="props" v-model="form.date" label="Date" :rules="[dateRule]" readonly />
-            </template>
-            <v-date-picker v-model="form.date" @update:model-value="dateMenu = false" />
-          </v-menu>
-
-          <!-- Time Picker -->
-          <v-menu v-model="timeMenu" transition="scale-transition" offset-y>
-            <template v-slot:activator="{ props }">
-              <v-text-field v-bind="props" v-model="form.time" label="Time" :rules="[timeRule]" readonly />
-            </template>
-            <v-time-picker
-              v-model="form.time"
-              format="24hr"
-              @update:model-value="timeMenu = false"
+    <!-- Dialog for Create/Update -->
+      <v-dialog v-model="showDialog" max-width="500px">
+        <v-card>
+          <v-card-title>{{ isEditing ? 'Edit Event' : 'Create Event' }}</v-card-title>
+          <v-form ref="formRef" @submit.prevent="submitForm">
+          <v-card-text>
+            <v-text-field 
+              label="Title" 
+              v-model="form.title" 
+              :rules="[requiredRule]"/>
+            <v-select
+              label="Category"
+              :items="categories"
+              v-model="form.category"
+              :rules="[requiredRule]"
             />
-          </v-menu>
-
-          <v-file-input 
-            v-model="form.image"
-            label="Upload Image"
-            accept="image/*"
-            prepend-icon="mdi-camera"
-          />
-
-          <v-btn type="submit" color="success" class="mt-4">Submit</v-btn>
-        </v-form>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-
-  <!-- Posts Section -->
-  <div class="page-wrapper">
-    <div class="posts-box">
-      <h2 class="text-h5 mb-4">Posts</h2>
-
-      <v-alert v-if="posts.length === 0" type="info" text class="mb-4">
-        No posts yet!
-      </v-alert>
-
-      <v-row v-else justify="center" align="stretch" class="post-grid">
-        <v-col
-            v-for="post in posts"
-            :key="post.id"
-            cols="12"
-            sm="6"
-            md="4"
-            lg="3"
-        >
-          <v-hover v-slot="{ isHovering, props }">
-            <v-card
-                class="mx-auto"
-                max-width="344"
-                v-bind="props"
-            >
-              <v-img
-                  :src="getImageUrl(post)"
-                  height="200"
-                  cover
-                  @error="retryImage(post)"
-              />
-
-              <v-card-text>
-                <h2 class="text-h6 text-primary">{{ post.title }}</h2>
-              </v-card-text>
-
-              <v-overlay
-                  :model-value="isHovering"
-                  class="align-center justify-center"
-                  scrim="rgba(0, 0, 0, 0.5)"
-                  contained
-                  style="border-radius: 12px;"
-              >
-                <div class="d-flex gap-4">
-                  <v-btn icon color="orange" @click.stop="handleEdit(post)">
-                    <v-icon>mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn icon color="red" @click.stop="handleDelete(post.id)">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </div>
-              </v-overlay>
-            </v-card>
-          </v-hover>
-        </v-col>
-
-      </v-row>
-    </div>
-  </div>
+            <v-textarea 
+              label="Description" 
+              v-model="form.description" 
+              :rules="[requiredRule]"/>
+            <v-text-field 
+              label="Location" 
+              v-model="form.location"
+              :rules="[requiredRule]"/>
+            <v-text-field
+              label="Time"
+              v-model="form.time"
+              type="datetime-local"
+              :rules="[requiredRule, datetimeRule]"
+            />
+            <v-file-input
+              label="Upload Image"
+              accept="image/*"
+              @change="handleFileChange"
+              prepend-icon="mdi-image"
+            />
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn text @click="closeDialog">Cancel</v-btn>
+            <v-btn color="primary" type="submit" :disabled="!formRef?.isValid">Save</v-btn>
+          </v-card-actions>
+          </v-form>
+        </v-card>
+      </v-dialog>
+  </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance, watch } from "vue";
-import EventCard from "@/components/EventCard.vue";
-import TokenService from "@/scripts/TokenService.js";
-import tokenService from "@/scripts/TokenService.js"; // Adjust path if needed
-import {getUsernameFromToken} from "@/utils/jwt.js";
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import { getUsernameFromToken } from '@/utils/jwt'
 
-const postForm = ref(null);
-const requiredRule = value => !!value || 'This field is required';
-const dateRule = value => !!value || 'Date is required';
-const timeRule = value => !!value || 'Time is required';
+const username = getUsernameFromToken();
 
-const posts = ref([]);//Holds the list of Events after you fetch.
-const showModal = ref(false);
-const dateMenu = ref(false);
-const timeMenu = ref(false);
-const hoveredPost = ref(null);
-const isEditing = ref(false);
-const selectedPostId = ref(null);
-const form = ref({
-  title: "",
-  description: "",
-  category: "",
-  location: "",
-  date: "",
-  time: "",
-  image: null, // holds File object
-  imageUrl: "", // holds encoded string
-});
-
-const getImageUrl = (post) => {
-  return `http://localhost:80${post.imageUrl}?t=${post.retryKey || ''}`;
-};
-
-const retryImage = (post) => {
-  setTimeout(() => {
-    post.retryKey = Date.now();
-  }, 500); // retry after 0.5s
-};
-
-
-// Axios setup
-const { appContext } = getCurrentInstance();
-const axios = appContext.config.globalProperties.$http;
-
-//Used this method to remount
-const fetchPosts = async () => {
-  const username = getUsernameFromToken();
-  try {
-    const response = await axios.get(`http://localhost/api/events/user/${username}`);
-    posts.value = response.data.map(post => ({
-  ...post,
-  retryKey: null
-}));
-
-  } catch (err) {
-    console.error("Error fetching posts:", err);
-  }
-};
-
-// Fetch posts from the backend when the component is mounted
-onMounted(fetchPosts);
-
-// Handle form submission for creating a post
-const submitPost = async () => {
-  const username = getUsernameFromToken();
-  const { valid } = await postForm.value.validate();
-  if (!valid || !form.value.date || !form.value.time) return;
-
-  let formattedDate = form.value.date;
-  let formattedTime = form.value.time;
-
-// Format them if they are Date objects
-if (form.value.date instanceof Date) {
-  formattedDate = formatDateToISO(form.value.date);
-}
-if (form.value.time instanceof Date) {
-  formattedTime = formatTimeToHHMM(form.value.time);
-}
-
-const dateTime = `${formattedDate}T${formattedTime}:00`; // ✅ Now it's guaranteed safe
-
-  const formData = new FormData();
-  formData.append("title", form.value.title);
-  formData.append("description", form.value.description);
-  formData.append("category", form.value.category);
-  formData.append("location", form.value.location);
-  formData.append("time", dateTime);
-  formData.append("username", username);
-
-  if (form.value.image) {
-    formData.append("image", form.value.image);
-  }
-
-  try {
-    let response;
-    if (isEditing.value && selectedPostId.value) {
-      response = await axios.put(`http://localhost/api/events/update/${selectedPostId.value}`, formData);
-    } else {
-      response = await axios.post("http://localhost/api/events/upload", formData);
-    }
-
-    // Reset form + refresh
-    openCreateModal(); // will reset form + flags
-    showModal.value = false;
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await fetchPosts();
-    return response.data;
-  } catch (error) {
-    console.error("Error submitting post:", error);
-    alert("Failed to submit post.");
-  }
-};
-
-const handleDelete = async (postId) => {
-  try{
-    await axios.delete(`http://localhost/api/events/delete/${postId}`);
-    await fetchPosts();//Remounts the page
-  } catch (error) {
-    console.error("Error deleting post:", error);
-    alert("Failed to delete post.");
-  }
-};
-
-const handleEdit = (post) => {
-  // 1) toggle into edit mode
-  isEditing.value = true
-  selectedPostId.value = post.id
-
-  // 2) pre-fill the form
-  form.value.title       = post.title
-  form.value.description = post.description
-  form.value.category    = post.category
-  form.value.location    = post.location
-
-  // split ISO timestamp into date + time
-  const [date, time] = post.time.split("T")
-  form.value.date = date
-  form.value.time = time.slice(0,5)
-
-  // keep existing image
-  form.value.image    = null
-  form.value.imageUrl = post.imageUrl
-
-  // 3) open the modal
-  showModal.value = true
-
-
-};
-
-// Categories state and fetch
+const events = ref([])
 const categories = ref([])
 
-onMounted(async () => {
-  try {
-    const response = await axios.get("api/events/categories")
-    categories.value = response.data
-  } catch (error) {
-    console.error("Error loading categories: ", error)
-  }
+const showDialog = ref(false)
+const isEditing = ref(false)
+const editingId = ref(null)
+
+const requiredRule = (v) => !!v || 'This field is required'
+const datetimeRule = (v) => !!v && !isNaN(Date.parse(v)) || 'Invalid date/time'
+
+const form = ref({
+  title: '',
+  category: '',
+  description: '',
+  time: '',
+  location: '',
+  image: null
 })
 
-const openCreateModal = () => {
-  // Reset form and editing state
+const handleFileChange = (files) => {
+  form.value.image = files?.[0] || null
+}
+
+const getImageUrl = (path) => `http://localhost${path}`
+
+// Format date to readable format
+const formatDate = (datetimeStr) => {
+  const date = new Date(datetimeStr)
+  return date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' }) +
+         ' at ' +
+         date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+const loadEvents = async () => {
+  try {
+    const res = await axios.get(`/api/events/user/${username}`)
+    events.value = res.data
+  } catch (err) {
+    console.error('Error loading events:', err)
+  }
+}
+
+const openCreateDialog = () => {
+  isEditing.value = false
+  editingId.value = null
   form.value = {
-    title: "",
-    description: "",
-    category: "",
-    location: "",
-    date: "",
-    time: "",
-    image: null,
-    imageUrl: "",
-  };
-  isEditing.value = false;
-  selectedPostId.value = null;
-  showModal.value = true;
-};
-
-function formatDateToISO(dateObj) {
-  const year = dateObj.getFullYear();
-  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-  const day = String(dateObj.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+    title: '',
+    category: '',
+    description: '',
+    time: '',
+    location: '',
+    image: null
+  }
+  showDialog.value = true
 }
 
-function formatTimeToHHMM(dateObj) {
-  const hours = String(dateObj.getHours()).padStart(2, '0');
-  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
+const editEvent = (event) => {
+  isEditing.value = true
+  editingId.value = event.id
+  form.value = {
+    title: event.title,
+    category: event.category,
+    description: event.description,
+    time: event.time,
+    location: event.location,
+    image: null
+  }
+  showDialog.value = true
 }
 
+const closeDialog = () => {
+  showDialog.value = false
+}
+
+const formRef = ref(null)
+
+const submitForm = async () => {
+  const valid = await formRef.value?.validate()
+  if (!valid) return
+
+  const formData = new FormData()
+  formData.append('title', form.value.title)
+  formData.append('category', form.value.category)
+  formData.append('description', form.value.description)
+  formData.append('time', form.value.time)
+  formData.append('location', form.value.location)
+  formData.append('username', username)
+
+  if (form.value.image) {
+    formData.append('image', form.value.image)
+  }
+
+  try {
+    if (isEditing.value) {
+      await axios.put(`/api/events/update/${editingId.value}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    } else {
+
+      await axios.post('/api/events/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    }
+
+    await loadEvents()
+    closeDialog()
+  } catch (err) {
+    console.error('Error submitting form:', err)
+  }
+}
+
+const deleteEvent = async (id) => {
+  try {
+    await axios.delete(`/api/events/delete/${id}`)
+    await loadEvents()
+  } catch (err) {
+    console.error('Failed to delete event:', err)
+  }
+}
+
+const fetchCategories = async () => {
+  try {
+    const res = await axios.get('/api/events/categories')
+    categories.value = res.data
+  } catch (err) {
+    console.error('Failed to load categories:', err)
+  }
+}
+
+onMounted(() => {
+  loadEvents()
+  fetchCategories()
+})
 </script>
