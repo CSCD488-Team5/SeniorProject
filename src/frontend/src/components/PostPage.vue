@@ -1,21 +1,36 @@
 <template>
   <v-container>
-    <v-btn color="primary" @click="openCreateDialog">Create New Event</v-btn>
+    <v-btn color="primary" class="mb-4" @click="openCreateDialog">Create New Event</v-btn>
 
-    <v-row>
+    <!-- If we have events, render them -->
+    <v-row v-if="events.length">
       <v-col v-for="event in events" :key="event.id" cols="12" md="6" lg="4">
         <v-card>
-          <v-img :src="event.imageUrl" height="200px" cover></v-img>
+          <v-img :src="event.imageUrl" cover></v-img>
           <v-card-title>{{ event.title }}</v-card-title>
           <v-card-subtitle>
             {{ event.location }} — {{ formatDate(event.time) }}
           </v-card-subtitle>
           <v-card-text>{{ event.description }}</v-card-text>
           <v-card-actions>
-            <v-btn @click="editEvent(event)">Edit</v-btn>
-            <v-btn color="error" @click="deleteEvent(event.id)">Delete</v-btn>
+            <v-btn @click="editEvent(event)" variant="tonal">Edit</v-btn>
+            <v-btn
+              :loading="deletingId === event.id"
+              :disabled="deletingId === event.id" 
+              color="error" 
+              @click="deleteEvent(event.id)" 
+              variant="tonal">Delete</v-btn>
           </v-card-actions>
         </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- if no events, show an alert -->
+    <v-row v-else>
+      <v-col cols="12">
+        <v-alert type="info"  colored-border elevation="2">
+          You have no events yet. Click "Create New Event" go get started.
+        </v-alert>
       </v-col>
     </v-row>
 
@@ -59,13 +74,48 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn text @click="closeDialog">Cancel</v-btn>
-            <v-btn color="primary" type="submit" :disabled="!formRef?.isValid">Save</v-btn>
+            <v-btn text @click="closeDialog" variant="tonal">Cancel</v-btn>
+            <v-btn 
+              color="primary" 
+              type="submit"
+              :loading="saving" 
+              :disabled="!formRef?.isValid" 
+              variant="tonal">Save</v-btn>
           </v-card-actions>
           </v-form>
         </v-card>
       </v-dialog>
+
+      
   </v-container>
+
+  <!-- Success Snackbar -->
+    <v-snackbar 
+      v-model="successSnackbar" 
+      color="success" 
+      timeout="3000"
+      location="top"
+      absolute
+      elevation="2">
+      {{ snackbarMessage }}
+      <template #actions>
+        <v-btn text @click="successSnackbar = false">Close</v-btn>
+      </template>
+    </v-snackbar>
+
+    <!-- Error Snackbar -->
+    <v-snackbar 
+      v-model="errorSnackbar" 
+      color="error" 
+      timeout="3000"
+      location="top"
+      absolute
+      elevation="2">
+      {{ snackbarMessage }}
+      <template #actions>
+        <v-btn text @click="errorSnackbar = false">Close</v-btn>
+      </template>
+    </v-snackbar>
 </template>
 
 <script setup>
@@ -81,6 +131,14 @@ const categories = ref([])
 const showDialog = ref(false)
 const isEditing = ref(false)
 const editingId = ref(null)
+
+const saving = ref(false)
+const deletingId = ref(null)
+
+// snackbars
+const successSnackbar = ref(false)
+const errorSnackbar = ref(false)
+const snackbarMessage = ref('')
 
 const requiredRule = (v) => !!v || 'This field is required'
 const datetimeRule = (v) => !!v && !isNaN(Date.parse(v)) || 'Invalid date/time'
@@ -112,7 +170,14 @@ const loadEvents = async () => {
     const res = await axios.get(`/api/events/user/${username}`)
     events.value = res.data
   } catch (err) {
-    console.error('Error loading events:', err)
+    if (err.response?.status === 404) {
+      // No events, so just show empty list
+      events.value = []
+    } else {
+      console.error('Error loading events:', err)
+    }
+    
+    
   }
 }
 
@@ -166,32 +231,58 @@ const submitForm = async () => {
     formData.append('image', form.value.image)
   }
 
-  // 📋 DEBUG: inspect everything
-  for (let [key, v] of formData.entries()) {
-    console.log(key, v)
-  }
+  // Set spinner
+  saving.value = true
+
+  // snapshot current list for rollback
+  const original = [...events.value]
 
   try {
     if (isEditing.value) {
-      await axios.put(`/api/events/update/${editingId.value}`, formData)
+      const { data } = await axios.put(`/api/events/update/${editingId.value}`, formData)
+      events.value = events.value.map(e => e.id === data.id ? data : e)
+      snackbarMessage.value = 'Event updated successfully!'
     } else {
-
-      await axios.post('/api/events/upload', formData)
+      const { data } = await axios.post('/api/events/upload', formData)
+      data.imageUrl = `${data.imageUrl}?t=${Date.now()}`
+      
+      events.value = [data, ...events.value]
+      snackbarMessage.value = 'Event created successfully!'
     }
 
-    await loadEvents()
+    successSnackbar.value = true
     closeDialog()
   } catch (err) {
     console.error('Error submitting form:', err)
+
+    // rollback on failure
+    events.value = original
+
+    // show error snackbar
+    snackbarMessage.value = 'Failed to save event. Please try again.'
+    errorSnackbar.value = true
+  } finally {
+    saving.value = false
   }
 }
 
 const deleteEvent = async (id) => {
+  deletingId.value = id
+  const original = [...events.value]
+  events.value = events.value.filter(e => e.id !== id)
   try {
     await axios.delete(`/api/events/delete/${id}`)
-    await loadEvents()
+    snackbarMessage.value = 'Event deleted successfully!'
+    successSnackbar.value = true
   } catch (err) {
     console.error('Failed to delete event:', err)
+
+    // rollback on error
+    events.value = original
+    snackbarMessage.value = 'Failed to delete event. Please try again.'
+    errorSnackbar.value = true
+  } finally {
+    deletingId.value = null
   }
 }
 
