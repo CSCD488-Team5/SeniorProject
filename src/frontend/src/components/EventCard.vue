@@ -224,7 +224,7 @@ async function submitDelete() {
 	}
 
 	try {
-		await axios.delete(`/api/events/delete/${props.id}`, {
+		await axios.delete(`/api/events/delete-event-admin/${props.id}`, {
 			data: { reason: deletionReason.value } 
 		})
 		emit('event-deleted', props.id)
