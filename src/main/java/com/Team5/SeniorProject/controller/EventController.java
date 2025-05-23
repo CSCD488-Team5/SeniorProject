@@ -31,6 +31,8 @@ import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.EmailService;
 import com.Team5.SeniorProject.repository.FollowRepository;
+import com.Team5.SeniorProject.service.CalendarService;
+
 
 @RestController
 @RequestMapping("/api/events")
@@ -53,6 +55,9 @@ public class EventController {
 
     @Autowired
     private FollowRepository followRepository;
+
+    @Autowired
+    private CalendarService calendarService;
 
 
 	@GetMapping
@@ -104,6 +109,13 @@ public class EventController {
             event.setUser(user);
             
             Event savedEvent = eventRepository.save(event);
+            try {
+                if (user.getGoogleAccessToken() != null) {
+                    calendarService.createGoogleCalendarEvent(user, savedEvent);
+                }
+            } catch (Exception e) {
+                System.out.println("Error creating Google Calendar event: " + e.getMessage());
+            }
             List<User> followers = followRepository.findByFollowee_Id(user.getId())
                 .stream()
                 .map(follow -> follow.getFollower())

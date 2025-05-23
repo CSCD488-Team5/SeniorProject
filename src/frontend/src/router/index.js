@@ -34,6 +34,11 @@ const routes = [
     name: "OAuthCallback",
     component: () => import("@/components/OAuthCallback.vue"),
   },
+  {
+    path: `/oauth2callback-google`,
+    name: `OAuthCallbackGoogle`,
+    component: () => import(`@/components/OAuthCallbackGoogle.vue`),
+  }
 ];
 
 const router = createRouter({
