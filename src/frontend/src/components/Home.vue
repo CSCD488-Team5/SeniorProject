@@ -89,8 +89,12 @@ import EventCard from './EventCard.vue';
 import { getUsernameFromToken, isAdminFromToken } from '@/utils/jwt'
 
 const allEvents = ref([]);
+const isAdmin = ref(false)
 
 onMounted(async () => {
+  isAdmin.value = isAdminFromToken()
+
+
   followedLoading.value = true
   try {
     const username = getUsernameFromToken();
@@ -198,10 +202,6 @@ function updateJoinedStatus({ id, joined }) {
   const target = allEvents.value.find(e => e.id === id)
   if (target) target.joined = joined
 }
-
-// const isAdmin = computed(() => isAdminFromToken());
-const isAdmin = ref(true)
-
 
 </script>
 

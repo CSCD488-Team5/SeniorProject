@@ -33,7 +33,7 @@ export function isAdminFromToken() {
 
     try {
         const decoded = jwtDecode(token);
-        return decoded.roles?.includes('ROLE_ADMIN') || false;
+        return decoded.role === 'ADMIN';
     } catch (error) {
         console.error('Failed to decode token for admin check:', error);
         return false;

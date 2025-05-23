@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.Team5.SeniorProject.model.User;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -36,6 +38,18 @@ public class JwtUtils {
             return bearerToken.substring(7); // Remove Bearer prefix
         }
         return null;
+    }
+
+    public String generateToken(User user) {
+        return Jwts.builder()
+            .subject(user.getUsername())
+            .claim("role", user.getRole().name())
+            .claim("userId", user.getId())
+            .claim("name", user.getName())
+            .issuedAt(new Date())
+            .expiration(new Date(new Date().getTime() + jwtExpirationMs))
+            .signWith(key())
+            .compact();
     }
 
     public String generateTokenFromUsername(UserDetails userDetails) {
