@@ -2,6 +2,7 @@ package com.Team5.SeniorProject.controller;
 
 import com.Team5.SeniorProject.jwt.JwtUtils;
 import com.Team5.SeniorProject.jwt.LoginRequest;
+import com.Team5.SeniorProject.model.Role;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.UserRepository;
 
@@ -15,10 +16,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Map;
 import java.util.List;
-
+import java.util.Optional;
 import com.Team5.SeniorProject.service.UserService;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth") // Changed to match SecurityConfig
@@ -74,4 +76,30 @@ public class SignupController {
 	public ResponseEntity<List<User>> getAllUsers() {
 		return ResponseEntity.ok(userRepository.findAll());
 	}
+
+
+	@PostMapping("/oauth/microsoft")
+public ResponseEntity<?> microsoftSSO(@RequestBody Map<String, Object> profile) {
+    // Extract email and name from the profile
+    String email = (String) profile.get("email");
+    String name = (String) profile.get("name");
+
+    if (email == null || name == null) {
+        return ResponseEntity.badRequest().body("Invalid profile data");
+    }
+	// Check if the user already exists
+	User user = userService.findOrCreateMicrosoftUser(email, name);
+    String jwt = jwtUtils.generateTokenFromUsername(user.getUsername());
+
+    return ResponseEntity.ok(Map.of("token", jwt));
+}
+
+
+
+
+
+
+
+
+
 }

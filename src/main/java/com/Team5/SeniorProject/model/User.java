@@ -23,7 +23,7 @@ public class User {
 	@Column(unique = true, nullable = false)
 	private String email;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String password;
 
 	@Column(unique = true, nullable = false)
@@ -60,7 +60,7 @@ public class User {
 	public void setPassword(String password) { this.password = password; }
 
 	public String getUsername() { return username; }
-	public void setUserName(String userName) {this.username = userName;}
+	public void setUserName(String username) {this.username = username;}
 
 
 	public Role getRole() {

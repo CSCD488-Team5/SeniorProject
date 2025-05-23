@@ -48,4 +48,6 @@ target/
 src/frontend/node/npm
 src/main/resources/static
 
+
 uploads/events/
+src/frontend/.env
