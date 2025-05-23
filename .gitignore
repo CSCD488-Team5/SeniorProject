@@ -48,7 +48,6 @@ target/
 src/frontend/node/npm
 src/main/resources/static
 
-# ENV File frontend
-src/frontend/.env
 
-# ENV File backend
+uploads/events/
+src/frontend/.env
