@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container :key="remountKey">
     <v-btn color="primary" class="mb-4" @click="openCreateDialog">Create New Event</v-btn>
 
     <!-- If we have events, render them -->
@@ -140,6 +140,8 @@ const successSnackbar = ref(false)
 const errorSnackbar = ref(false)
 const snackbarMessage = ref('')
 
+const remountKey = ref(0)
+
 const requiredRule = (v) => !!v || 'This field is required'
 const datetimeRule = (v) => !!v && !isNaN(Date.parse(v)) || 'Invalid date/time'
 const imageRule = (file) => isEditing.value || (file instanceof File) || 'Image is required'
@@ -234,9 +236,6 @@ const submitForm = async () => {
   // Set spinner
   saving.value = true
 
-  // snapshot current list for rollback
-  const original = [...events.value]
-
   try {
     if (isEditing.value) {
       const { data } = await axios.put(`/api/events/update/${editingId.value}`, formData)
@@ -244,11 +243,12 @@ const submitForm = async () => {
       snackbarMessage.value = 'Event updated successfully!'
     } else {
       const { data } = await axios.post('/api/events/upload', formData)
-      data.imageUrl = `${data.imageUrl}?t=${Date.now()}`
       
       events.value = [data, ...events.value]
       snackbarMessage.value = 'Event created successfully!'
     }
+
+    remountKey.value++
 
     successSnackbar.value = true
     closeDialog()

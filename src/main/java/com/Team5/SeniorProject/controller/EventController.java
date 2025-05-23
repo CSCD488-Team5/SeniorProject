@@ -1,6 +1,8 @@
 package com.Team5.SeniorProject.controller;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,12 +37,19 @@ import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.EmailService;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+
 @RestController
 @RequestMapping("/api/events")
 @CrossOrigin(origins = "http://localhost:5173")
 public class EventController {
 
-    private static final String UPLOAD_DIR = "src/main/resources/static/images/events/";
+    // inject from application.properties
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     @Autowired
     private EventRepository eventRepository;
@@ -86,9 +97,9 @@ public class EventController {
 
             // Step 1: Save image to /static/images/events/
             String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-            java.nio.file.Path filePath = java.nio.file.Paths.get(UPLOAD_DIR, filename);
-            java.nio.file.Files.createDirectories(filePath.getParent());
-            java.nio.file.Files.write(filePath, imageFile.getBytes());
+            Path filePath = Paths.get(uploadDir, filename);
+            Files.createDirectories(filePath.getParent());
+            Files.write(filePath, imageFile.getBytes());
 
             // Step 2: Build relative URL for serving
             String imageUrl = "/images/events/" + filename;
@@ -169,9 +180,9 @@ public class EventController {
             try {
                 // Step 1: Save image to /static/images/events/
                 String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-                java.nio.file.Path filePath = java.nio.file.Paths.get(UPLOAD_DIR, filename);
-                java.nio.file.Files.createDirectories(filePath.getParent());
-                java.nio.file.Files.write(filePath, imageFile.getBytes());
+                Path filePath = Paths.get(uploadDir, filename);
+                Files.createDirectories(filePath.getParent());
+                Files.write(filePath, imageFile.getBytes());
 
                 // Step 2: Build relative URL for serving
                 String imageUrl = "/images/events/" + filename;
@@ -244,5 +255,15 @@ public class EventController {
 
         return ResponseEntity.ok(allEvents);
     }
+
+    @GetMapping("/image/{filename:.+}")
+    public ResponseEntity<Resource> serveImage(@PathVariable String filename) throws MalformedURLException, IOException {
+    Path path = Paths.get(uploadDir).resolve(filename);
+    Resource img = new UrlResource(path.toUri());
+    return ResponseEntity.ok()
+        .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path))
+        .body(img);
+}
+
 
 }
