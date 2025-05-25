@@ -21,6 +21,15 @@ const newPassword = ref("")
 const snackbar = ref(false)
 const snackbarMessage = ref("")
 
+
+const handleGoogleCalendarSync = () => {
+  const clientId = ``
+  const redirectUri = ``
+  const scope = 'https://www.googleapis.com/auth/calendar.events'
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&access_type=offline&prompt=consent`
+  window.location.href = authUrl
+}
+
 // change password logic
 const submitChangePassword = async () => {
   try {
@@ -116,6 +125,10 @@ const profile = () => {
 
       <v-list-item @click="showDeleteDialog = true">
         <v-list-item-title>Delete Account</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item @click="handleGoogleCalendarSync">
+        <v-list-item-title>Sync Google Calendar</v-list-item-title>
       </v-list-item>
 
       <v-list-item @click="signOut">

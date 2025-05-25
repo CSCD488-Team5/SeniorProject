@@ -17,13 +17,15 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final JoinedEventRepository joinedEventRepository;
+    private final CalendarService calendarService;
 
     public EventService(EventRepository eventRepository,
                         UserRepository userRepository,
-                        JoinedEventRepository joinedEventRepository) {
+                        JoinedEventRepository joinedEventRepository, CalendarService calendarService) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.joinedEventRepository = joinedEventRepository;
+        this.calendarService = calendarService;
     }
 
     @Transactional
@@ -38,9 +40,15 @@ public class EventService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new Exception("User not found"));
 
+        String googleEventId = null;
+        if (calendarService.isConnected(user)) {
+            googleEventId = calendarService.syncEvent(user, event);
+        }        
+
         JoinEvent joinEvent = new JoinEvent();
         joinEvent.setEvent(event);
         joinEvent.setUser(user);
+        joinEvent.setGoogleCalendarEventId(googleEventId);
         joinEvent.setJoined(LocalDateTime.now());
 
         joinedEventRepository.save(joinEvent);
@@ -61,6 +69,11 @@ public class EventService {
                 .orElseThrow(() -> new Exception("User has not joined this event."));
 
         joinedEventRepository.delete(joinEvent);
+
+        String googleEventId = joinEvent.getGoogleCalendarEventId();
+        if (calendarService.isConnected(user) && googleEventId != null) {
+            calendarService.deleteGoogleCalendarEvent(user, googleEventId);
+        }
     }
 
     public boolean isUserJoined(Long eventId, String username) {
