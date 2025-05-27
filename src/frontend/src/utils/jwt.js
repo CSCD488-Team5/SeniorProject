@@ -26,3 +26,16 @@ export function getUsernameFromToken() {
         return null;
     }
 }
+
+export function isAdminFromToken() {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+
+    try {
+        const decoded = jwtDecode(token);
+        return decoded.role === 'ADMIN';
+    } catch (error) {
+        console.error('Failed to decode token for admin check:', error);
+        return false;
+    }
+}

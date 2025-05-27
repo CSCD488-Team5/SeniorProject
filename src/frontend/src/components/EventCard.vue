@@ -31,11 +31,43 @@
   				{{ joined ? 'Unjoin' : 'Join' }}
 			</v-btn>
 
+			<!-- DELETE BUTTON FOR ADMIN -->
+			<v-btn
+				v-if="props.isAdmin"
+				color="red-darken-4"
+				text
+				variant="tonal"
+				@click="showDeleteDialog = true"
+				>
+					Delete
+				</v-btn>
+
 			<v-spacer></v-spacer>
 			<v-btn icon @click="toggleContent">
 				<v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
 			</v-btn>
 		</v-card-actions>
+
+		<!-- Delete dialog for ADMIN -->
+		<v-dialog v-model="showDeleteDialog" max-width="500">
+			<v-card>
+				<v-card-title>Delete "{{ props.title }}"?</v-card-title>
+				<v-card-text>
+					<v-textarea
+						v-model="deletionReason"
+						label="Reason for deletion"
+						auto-grow
+						rows="3"
+						required
+					/>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer/>
+					<v-btn text @click="showDeleteDialog = false" variant="tonal">Cancel</v-btn>
+					<v-btn color="red-darken-3" @click="submitDelete" variant="tonal">Confirm Delete</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 
 		<v-expand-transition>
 			<div v-show="show">
@@ -49,6 +81,15 @@
 			</div>
 		</v-expand-transition>
 	</v-card>
+
+	<v-snackbar
+		v-model="snackbar"
+		:timeout="5000"
+		color="snackbarColor"
+		location="top"
+	>
+		{{ snackbarMessage }}
+	</v-snackbar>
 </template>
 
 <script setup>
@@ -71,7 +112,8 @@ const props = defineProps({
 	time: String,
 	imageSrc: String,
 	username: String, // Creator of the post
-	joined: Boolean
+	joined: Boolean,
+	isAdmin: Boolean
 })
 
 const computedImageSrc = computed(() => {
@@ -163,7 +205,42 @@ function goToUserProfile() {
   router.push({ name: 'Profile', params: { username: props.username } });
 }
 
-const emit = defineEmits(['update:joined'])
+const emit = defineEmits(['update:joined', 'event-deleted'])
+
+// Deletion logic for ADMIN
+const showDeleteDialog = ref(false)
+const deletionReason = ref('')
+
+const snackbar = ref(false)
+const snacbarMessage = ref('')
+const snackbarColor = ref('')
+
+async function submitDelete() {
+	if (!deletionReason.value.trim()) {
+		snackbarMessage.value = "Please provide a reason."
+		snackbarColor.value = "red"
+		snackbar.value = true
+		return
+	}
+
+	try {
+		await axios.delete(`/api/events/delete-event-admin/${props.id}`, {
+			data: { reason: deletionReason.value } 
+		})
+		emit('event-deleted', props.id)
+		showDeleteDialog.value = false
+		deletionReason.value = ''
+
+		snackbarMessage.value = 'Event deleted successfully.'
+		snackbarColor.value = "green"
+		snackbar.value = true
+	} catch (err) {
+		console.error('Delete failed:', err)
+		snackbarMessage.value = "Failed to delete event."
+		snackbarColor.value = "red"
+		snackbar.value = true
+	}
+}
 </script>
 
 

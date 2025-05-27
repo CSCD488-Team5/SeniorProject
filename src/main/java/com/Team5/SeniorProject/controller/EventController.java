@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,6 +48,7 @@ import org.springframework.http.HttpHeaders;
 @RequestMapping("/api/events")
 @CrossOrigin(origins = "http://localhost:5173")
 public class EventController {
+
 
     // inject from application.properties
     @Value("${file.upload-dir}")
@@ -180,6 +183,7 @@ public class EventController {
             try {
                 // Step 1: Save image to /static/images/events/
                 String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+
                 Path filePath = Paths.get(uploadDir, filename);
                 Files.createDirectories(filePath.getParent());
                 Files.write(filePath, imageFile.getBytes());
@@ -256,6 +260,37 @@ public class EventController {
         return ResponseEntity.ok(allEvents);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/delete-event-admin/{id}")
+    public ResponseEntity<?> deleteEventAsAdmin(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+
+        if (!eventRepository.existsById(id)) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
+
+        String reason = body != null ? body.get("reason") : null;
+        if (reason == null || reason.trim().isEmpty()) return ResponseEntity.badRequest().body("Deletion reason is required.");
+
+        Event event = eventRepository.findById(id).orElse(null);
+        if (event == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not found.");
+
+        List<JoinEvent> joinEvents = joinedEventRepository.findByEvent_Id(id);
+        List<User> participants = joinEvents.stream()
+                .map(JoinEvent::getUser)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        User creator = event.getUser();
+        if (!participants.contains(creator)) participants.add(creator);
+
+        joinedEventRepository.deleteAll(joinEvents);
+        eventRepository.deleteById(id);
+
+        emailService.sendEventDeletionEmail(participants, event.getTitle(), reason);
+
+        return ResponseEntity.ok("Event deleted by admin with reason: " + reason);
+    }
+
     @GetMapping("/image/{filename:.+}")
     public ResponseEntity<Resource> serveImage(@PathVariable String filename) throws MalformedURLException, IOException {
     Path path = Paths.get(uploadDir).resolve(filename);
@@ -264,6 +299,5 @@ public class EventController {
         .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(path))
         .body(img);
 }
-
 
 }
