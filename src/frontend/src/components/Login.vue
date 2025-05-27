@@ -10,6 +10,25 @@ const password = ref('');
 const message = ref('');
 const form = ref(null);
 
+const clientId = import.meta.env.VITE_CAMPUSHIVE_CLIENTID;
+const tenantId = 'common';
+const redirectUrl = import.meta.env.VITE_REDIRECT_URL;
+
+
+const redirectToMicrosoftSSO = () => {
+  const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}` +
+              `&response_type=token` +
+              `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
+              `&scope=openid%20profile%20email`+
+              `&prompt=select_account`;
+  console.log("Client ID:", clientId);
+  console.log("Redirect URL:", redirectUrl);
+
+
+  window.location.href = url;
+};
+
+
 // Validation rules
 const required = (v) => !!v || 'This field is required';
 
@@ -67,6 +86,15 @@ const login = async () => {
           class="mt-4"
         >
           Login
+        </v-btn>
+
+        <v-btn
+          block
+          color="info"
+          class="mt-2"
+          prepend-icon="mdi-microsoft"
+          @click="redirectToMicrosoftSSO">
+          Continue with Microsoft
         </v-btn>
 
         <v-alert
