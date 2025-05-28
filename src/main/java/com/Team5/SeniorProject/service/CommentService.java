@@ -7,6 +7,7 @@ import com.Team5.SeniorProject.model.PostComments;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.model.Event;
 
+import jakarta.persistence.TableGenerator;
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -55,6 +56,8 @@ public class CommentService {
             throw new  RuntimeException("Only author can delete the comment!");
         }
     }
+
+    @Transactional
 
     //-----------------------------------------------------------------------------------------------------------------------------
     //Helper Methods
