@@ -35,6 +35,7 @@ public class Event {
 	private String location;
 	@Lob
 	private String imageUrl;
+	private String creatorCalendarEventId;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
