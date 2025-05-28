@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<PostComments, Long>{
     List<PostComments> findByEventId(long eventId);
+    List<PostComments> findByUser_Username(String username);
 }
