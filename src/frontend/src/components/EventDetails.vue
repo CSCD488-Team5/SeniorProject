@@ -34,8 +34,16 @@
                 Post by: {{ comment.user.username }}, {{ formatCommentDate(comment.timeStamp) }}
               </v-list-item-subtitle>
 
-              <v-list-item-action v-if="currentUser && comment.user.username == currentUser">
-                <v-btn icon small text class="pa-1" @click="deleteComment(comment.id)">
+              <v-list-item-action v-if="currentUser && comment.user.username == currentUser || isAdmin">
+                <v-btn 
+                  icon 
+                  small 
+                  text 
+                  class="pa-1" 
+                  @click="deleteComment(comment.id)"
+                  :loading="deletingCommentId === comment.id"
+                  :disabled="deletingCommentId === comment.id"
+                >
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </v-list-item-action>
@@ -65,6 +73,15 @@
     <div v-else>
       <p>Loading event details...</p>
     </div>
+
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+      location="top"
+    >
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -72,7 +89,7 @@
 import { ref, onMounted, computed, getCurrentInstance } from 'vue'
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
-import {getUsernameFromToken} from "@/utils/jwt.js";
+import {getUsernameFromToken, isAdminFromToken} from "@/utils/jwt.js";
 
 const route = useRoute()
 const eventId = route.params.id
@@ -84,6 +101,13 @@ const comments = ref([])
 const newComment = ref('')
 //grabs the current user
 const currentUser = ref(null);
+const isAdmin = ref(isAdminFromToken());
+// Loading state for comment deletion
+const deletingCommentId = ref(null);
+// Snackbar state
+const showSnackbar = ref(false);
+const snackbarMessage = ref('');
+const snackbarColor = ref('success');
 
 const { appContext } = getCurrentInstance()
 const axios = appContext.config.globalProperties.$http
@@ -97,6 +121,7 @@ async function fetchEvent() {
 async function fetchCurrentUser(){
     const username = getUsernameFromToken();
     currentUser.value = username;
+    isAdmin.value = isAdminFromToken();
 }
 
 // Fetch comments
@@ -119,9 +144,21 @@ async function submitComment() {
 }
 
 //Delete a comment
-async function deleteComment(commentid) {
-  await axios.delete(`/api/comments/${commentid}/deleteComment`)
-  await fetchComments(); 
+async function deleteComment(commentId) {
+  deletingCommentId.value = commentId;
+  try {
+    await axios.delete(`/api/comments/${commentId}/deleteComment`)
+    await fetchComments(); 
+    snackbarMessage.value = 'Comment deleted successfully'
+    snackbarColor.value = 'success'
+    showSnackbar.value = true
+  } catch (error) {
+    snackbarMessage.value = error.response?.data || 'Failed to delete comment'
+    snackbarColor.value = 'error'
+    showSnackbar.value = true
+  } finally {
+    deletingCommentId.value = null
+  }
 }
 
 // Format comment timestamp
