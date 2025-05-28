@@ -120,7 +120,7 @@
 	<v-snackbar
 		v-model="snackbar"
 		:timeout="5000"
-		color="snackbarColor"
+		:color="snackbarColor"
 		location="top"
 	>
 		{{ snackbarMessage }}
@@ -199,9 +199,16 @@ async function joinEvent() {
 		})
 		joined.value = true
 		emit('update:joined', { id: props.id, joined: true})
+		
+		// Show success notification
+		snackbarMessage.value = 'Successfully joined the event!'
+		snackbarColor.value = 'success'
+		snackbar.value = true
 	} catch (error) {
 		console.error('Join event error:', error.response);
-		alert(error.response?.data || 'Failed to join the event')
+		snackbarMessage.value = error.response?.data || 'Failed to join the event'
+		snackbarColor.value = 'error'
+		snackbar.value = true
 	}
 }
 
@@ -217,10 +224,17 @@ async function unjoinEvent() {
       params: { username }
     })
     joined.value = false
-	emit('update:joined', { id: props.id, joined: false})
+    emit('update:joined', { id: props.id, joined: false})
+    
+    // Show success notification
+    snackbarMessage.value = 'Successfully unjoined the event'
+    snackbarColor.value = 'success'
+    snackbar.value = true
   } catch (error) {
     console.error('Unjoin event error:', error.response)
-    alert(error.response?.data || 'Failed to unjoin the event')
+    snackbarMessage.value = error.response?.data || 'Failed to unjoin the event'
+    snackbarColor.value = 'error'
+    snackbar.value = true
   }
 }
 
@@ -275,12 +289,12 @@ async function submitDelete() {
 		deletionReason.value = ''
 
 		snackbarMessage.value = 'Event deleted successfully.'
-		snackbarColor.value = "green"
+		snackbarColor.value = "success"
 		snackbar.value = true
 	} catch (err) {
 		console.error('Delete failed:', err)
 		snackbarMessage.value = "Failed to delete event."
-		snackbarColor.value = "red"
+		snackbarColor.value = "error"
 		snackbar.value = true
 	} finally {
 		isDeleting.value = false
