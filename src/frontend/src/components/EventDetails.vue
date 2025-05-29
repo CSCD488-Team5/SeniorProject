@@ -55,32 +55,6 @@
       </v-card>
 
       <!-- Comments Section -->
-      <v-card class="pa-4 mt-6">
-        <h2 class="text-h6 mb-4">Comments</h2>
-        <v-list>
-          
-          <v-list-item v-for="comment in comments" :key="comment.id" class="d-flex justify-space-between align-center">
-
-              <v-list-item-title class="font-weight-bold">
-                {{ comment.comment }}
-              </v-list-item-title>
-              <!-- Display username below comment -->
-              <v-list-item-subtitle class="subtitle-2 font-weight-medium">
-                Post by: {{ comment.user.username }}, {{ formatCommentDate(comment.timeStamp) }}
-              </v-list-item-subtitle>
-
-              <v-list-item-action v-if="currentUser && comment.user.username == currentUser || isAdmin">
-                <v-btn 
-                  icon 
-                  small 
-                  text 
-                  class="pa-1" 
-                  @click="deleteComment(comment.id)"
-                  :loading="deletingCommentId === comment.id"
-                  :disabled="deletingCommentId === comment.id"
-                >
-                  <v-icon>mdi-delete</v-icon>
-
       <v-card class="mt-6" elevation="4" rounded="lg">
         <v-card-title class="text-h6 pa-4 pb-2">
           Comments
@@ -116,7 +90,6 @@
                   @click="deleteComment(comment.id)"
                 >
                   <v-icon size="small">mdi-delete</v-icon>
-
                 </v-btn>
               </div>
             </div>
@@ -208,17 +181,24 @@ async function fetchCurrentUser(){
 async function submitComment() {
   const now = new Date().toISOString().slice(0,19);//Formats the time stamp
   
-  await axios.post(`/api/comments/${eventId}/postComment`, {
-    comment: newComment.value,
-    timeStamp: now
-  })
-  newComment.value = ''
+  try {
+    await axios.post(`/api/comments/${eventId}/postComment`, {
+      comment: newComment.value,
+      timeStamp: now
+    })
+    newComment.value = ''
+    
+    // Refresh the event data to show the new comment
+    await fetchEvent()
 
-  await fetchComments()
-
-  snackbarMessage.value = 'Comment posted successfully'
-  snackbarColor.value = 'success'
-  showSnackbar.value = true
+    snackbarMessage.value = 'Comment posted successfully'
+    snackbarColor.value = 'success'
+    showSnackbar.value = true
+  } catch (error) {
+    snackbarMessage.value = error.response?.data || 'Failed to post comment'
+    snackbarColor.value = 'error'
+    showSnackbar.value = true
+  }
 }
 
 //Delete a comment
@@ -226,7 +206,7 @@ async function deleteComment(commentId) {
   deletingCommentId.value = commentId;
   try {
     await axios.delete(`/api/comments/${commentId}/deleteComment`)
-    await fetchComments(); 
+    await fetchEvent(); // Refresh the event data to update comments
     snackbarMessage.value = 'Comment deleted successfully'
     snackbarColor.value = 'success'
     showSnackbar.value = true
@@ -237,15 +217,6 @@ async function deleteComment(commentId) {
   } finally {
     deletingCommentId.value = null
   }
-
-  await fetchEvent() // Refresh the event data to get the new comment
-}
-
-//Delete a comment
-async function deleteComment(commentid) {
-  await axios.delete(`/api/comments/${commentid}/deleteComment`)
-  await fetchEvent() // Refresh the event data to update comments
-
 }
 
 // Format comment timestamp
@@ -286,9 +257,6 @@ onMounted(async () => {
 .font-weight-bold {
   font-weight: bold;
 }
-
-</style>
-
 
 .event-image {
   border-radius: 8px 8px 0 0;
