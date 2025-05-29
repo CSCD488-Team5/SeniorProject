@@ -34,8 +34,6 @@ public class PostComments {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-
     private String comment; 
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")

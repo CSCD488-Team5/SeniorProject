@@ -99,13 +99,15 @@
               <div class="d-flex align-center">
                 <div class="flex-grow-1">
                   <div class="d-flex align-center">
-                    <span class="text-subtitle-1 font-weight-medium">{{ comment.user.username }}</span>
+                    <span class="text-subtitle-1 font-weight-medium">
+                      {{ comment.user ? comment.user.username : 'Unknown User' }}
+                    </span>
                     <span class="text-caption text-medium-emphasis ml-2">{{ formatCommentDate(comment.timeStamp) }}</span>
                   </div>
                   <p class="comment-text mt-1 mb-0">{{ comment.comment }}</p>
                 </div>
                 <v-btn
-                  v-if="currentUser && comment.user.username === currentUser"
+                  v-if="currentUser && comment.user && comment.user.username === currentUser"
                   icon
                   variant="text"
                   size="small"
@@ -174,8 +176,8 @@ const eventId = route.params.id
 
 // Event data
 const eventData = ref(null)
-// Comments data
-const comments = ref([])
+// Comments data - will be derived from eventData
+const comments = computed(() => eventData.value?.comments || [])
 const newComment = ref('')
 //grabs the current user
 const currentUser = ref(null);
@@ -202,13 +204,6 @@ async function fetchCurrentUser(){
     isAdmin.value = isAdminFromToken();
 }
 
-// Fetch comments
-async function fetchComments() {
-  const { data } = await axios.get(`/api/comments/${eventId}`);
-  console.log("RAW COMMENTS JSON:", data);
-  comments.value = data;
-}
-
 // Submit a new comment
 async function submitComment() {
   const now = new Date().toISOString().slice(0,19);//Formats the time stamp
@@ -218,6 +213,7 @@ async function submitComment() {
     timeStamp: now
   })
   newComment.value = ''
+
   await fetchComments()
 
   snackbarMessage.value = 'Comment posted successfully'
@@ -241,6 +237,15 @@ async function deleteComment(commentId) {
   } finally {
     deletingCommentId.value = null
   }
+
+  await fetchEvent() // Refresh the event data to get the new comment
+}
+
+//Delete a comment
+async function deleteComment(commentid) {
+  await axios.delete(`/api/comments/${commentid}/deleteComment`)
+  await fetchEvent() // Refresh the event data to update comments
+
 }
 
 // Format comment timestamp
@@ -258,11 +263,10 @@ const formattedImageSrc = computed(() => {
   return ''
 })
 
-// On mount, fetch both event and comments
+// On mount, fetch event and current user
 onMounted(async () => {
   await fetchCurrentUser()
   await fetchEvent()
-  await fetchComments()
 })
 </script>
 

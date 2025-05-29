@@ -18,7 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Team5.SeniorProject.model.PostComments;
+
 import com.Team5.SeniorProject.service.CommentService;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+
 
 @RestController
 @RequestMapping("/api/comments")
