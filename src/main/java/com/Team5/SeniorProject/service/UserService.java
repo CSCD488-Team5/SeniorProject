@@ -8,7 +8,6 @@ import com.Team5.SeniorProject.repository.EventRepository;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import com.Team5.SeniorProject.repository.CommentRepository;
 
 @Service
 @Transactional
