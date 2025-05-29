@@ -1,23 +1,58 @@
 <template>
-  <v-container max-width="800px">
+  <v-container max-width="800px" class="py-6">
     <div v-if="eventData">
-      <!-- Display the event image if available -->
-      <v-img
-        v-if="eventData.imageUrl"
-        :src="formattedImageSrc"
-        height="300px"
-        cover
-      />
+      <v-card class="mb-6" elevation="4" rounded="lg">
+        <v-img
+          v-if="eventData.imageUrl"
+          :src="formattedImageSrc"
+          height="400px"
+          cover
+          class="event-image"
+        >
+          <template v-slot:placeholder>
+            <v-row class="fill-height ma-0" align="center" justify="center">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            </v-row>
+          </template>
+        </v-img>
 
-      <h1 class="mt-4">{{ eventData.title }}</h1>
+        <v-card-text class="pa-6">
+          <!-- Event Title and Category -->
+          <div class="d-flex align-center mb-4">
+            <h1 class="text-h4 font-weight-bold flex-grow-1">{{ eventData.title }}</h1>
+            <v-chip
+              v-if="eventData.category"
+              color="primary"
+              size="large"
+              class="ml-4"
+            >
+              {{ eventData.category }}
+            </v-chip>
+          </div>
 
-      <v-chip color="primary" class="ma-2" v-if="eventData.category">
-        {{ eventData.category }}
-      </v-chip>
+          <!-- Event Details -->
+          <v-row class="mt-4">
+            <v-col cols="12" md="6">
+              <div class="event-detail-item">
+                <v-icon icon="mdi-account" class="mr-2" color="primary"></v-icon>
+                <span class="text-subtitle-1">Created by {{ eventData.user.username }}</span>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="event-detail-item">
+                <v-icon icon="mdi-map-marker" class="mr-2" color="primary"></v-icon>
+                <span class="text-subtitle-1">{{ eventData.location }}</span>
+              </div>
+            </v-col>
+          </v-row>
 
-      <p><strong>Created By:</strong> {{ eventData.user.username }}</p>
-      <p><strong>Description:</strong> {{ eventData.description }}</p>
-      <p><strong>Location:</strong> {{ eventData.location }}</p>
+          <!-- Event Description -->
+          <v-card class="mt-6 pa-4" variant="outlined">
+            <h2 class="text-h6 mb-3">Description</h2>
+            <p class="event-description">{{ eventData.description }}</p>
+          </v-card>
+        </v-card-text>
+      </v-card>
 
       <!-- Comments Section -->
       <v-card class="pa-4 mt-6">
@@ -45,28 +80,71 @@
                   :disabled="deletingCommentId === comment.id"
                 >
                   <v-icon>mdi-delete</v-icon>
+
+      <v-card class="mt-6" elevation="4" rounded="lg">
+        <v-card-title class="text-h6 pa-4 pb-2">
+          Comments
+          <v-spacer></v-spacer>
+          <span class="text-caption text-medium-emphasis">{{ comments.length }} comments</span>
+        </v-card-title>
+
+        <v-card-text class="pa-4">
+          <!-- Comments List -->
+          <div class="comments-container">
+            <div v-if="comments.length === 0" class="text-center py-4 text-medium-emphasis">
+              No comments yet. Be the first to comment!
+            </div>
+            
+            <div v-for="comment in comments" :key="comment.id" class="comment-item mb-4">
+              <div class="d-flex align-center">
+                <div class="flex-grow-1">
+                  <div class="d-flex align-center">
+                    <span class="text-subtitle-1 font-weight-medium">{{ comment.user.username }}</span>
+                    <span class="text-caption text-medium-emphasis ml-2">{{ formatCommentDate(comment.timeStamp) }}</span>
+                  </div>
+                  <p class="comment-text mt-1 mb-0">{{ comment.comment }}</p>
+                </div>
+                <v-btn
+                  v-if="currentUser && comment.user.username === currentUser"
+                  icon
+                  variant="text"
+                  size="small"
+                  color="error"
+                  class="ml-2"
+                  @click="deleteComment(comment.id)"
+                >
+                  <v-icon size="small">mdi-delete</v-icon>
+
                 </v-btn>
-              </v-list-item-action>
+              </div>
+            </div>
+          </div>
 
-          </v-list-item>
-          <v-list-item v-if="comments.length === 0">
-              <v-list-item-title>No comments yet.</v-list-item-title>
-          </v-list-item>
-        </v-list>
-
-        <!-- Add Comment Form -->
-        <v-form @submit.prevent="submitComment">
-          <v-textarea
-            v-model="newComment"
-            label="Add a comment"
-            rows="3"
-            outlined
-            required
-          />
-          <v-btn class="mt-3" color="primary" :disabled="!newComment.trim()" type="submit">
-            Post Comment
-          </v-btn>
-        </v-form>
+          <!-- Add Comment Form -->
+          <v-divider class="my-4"></v-divider>
+          <v-form @submit.prevent="submitComment">
+            <v-textarea
+              v-model="newComment"
+              label="Add a comment"
+              rows="3"
+              variant="outlined"
+              density="comfortable"
+              hide-details="auto"
+              class="mb-2"
+              required
+            ></v-textarea>
+            <div class="d-flex justify-end">
+              <v-btn
+                color="primary"
+                type="submit"
+                :disabled="!newComment.trim()"
+                class="mt-2"
+              >
+                Post Comment
+              </v-btn>
+            </div>
+          </v-form>
+        </v-card-text>
       </v-card>
     </div>
 
@@ -195,7 +273,71 @@ onMounted(async () => {
 .mt-6 {
   margin-top: 1.5rem;
 }
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
 .font-weight-bold {
   font-weight: bold;
+}
+
+</style>
+
+
+.event-image {
+  border-radius: 8px 8px 0 0;
+}
+
+.event-detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.event-description {
+  color: rgba(0, 0, 0, 0.87);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 1.1rem;
+}
+
+.comments-container {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.comment-item:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.comment-text {
+  color: rgba(0, 0, 0, 0.87);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .text-h4 {
+    font-size: 1.75rem !important;
+  }
+  
+  .event-detail-item {
+    margin-bottom: 0.75rem;
+  }
+  
+  .v-card-text {
+    padding: 1rem !important;
+  }
 }
 </style>

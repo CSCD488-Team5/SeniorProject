@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
+import java.time.Instant;
 @Entity
 @Table(name = "users")
 public class User {
@@ -35,6 +35,14 @@ public class User {
 
 	@Column(nullable = false)
 	private boolean enabled = true; // Added with default value
+
+	@Column(length = 2048)
+	private String googleAccessToken;
+
+	@Column(length = 2048)
+	private String googleRefreshToken;
+
+	private Instant googleTokenExpiry;
 
 	public User() {}
 
@@ -72,4 +80,13 @@ public class User {
 
 	public boolean isEnabled() { return enabled; }
 	public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+	public String getGoogleAccessToken() {return googleAccessToken; }
+	public void setGoogleAccessToken(String googleAccessToken) { this.googleAccessToken = googleAccessToken; }
+
+	public String getGoogleRefreshToken() { return googleRefreshToken; }
+	public void setGoogleRefreshToken(String googleRefreshToken) { this.googleRefreshToken = googleRefreshToken; }
+
+	public Instant getGoogleTokenExpiry() { return googleTokenExpiry; }
+	public void setGoogleTokenExpiry(Instant googleTokenExpiry) { this.googleTokenExpiry = googleTokenExpiry;}
 }

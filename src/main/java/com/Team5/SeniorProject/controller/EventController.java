@@ -42,6 +42,7 @@ import com.Team5.SeniorProject.repository.FollowRepository;
 import com.Team5.SeniorProject.repository.JoinedEventRepository;
 import com.Team5.SeniorProject.repository.UserRepository;
 import com.Team5.SeniorProject.service.EmailService;
+import com.Team5.SeniorProject.service.CalendarService;
 
 @RestController
 @RequestMapping("/api/events")
@@ -66,6 +67,9 @@ public class EventController {
 
     @Autowired
     private FollowRepository followRepository;
+
+    @Autowired
+    private CalendarService calendarService;
 
     @GetMapping
     public List<Event> getAllEvents() {
@@ -115,6 +119,11 @@ public class EventController {
             event.setLocation(location);
             event.setImageUrl(imageUrl);
             event.setUser(user);
+
+            if (calendarService.isConnected(user)) {
+                String calendarEventId = calendarService.syncEvent(user, event);
+                event.setCreatorCalendarEventId(calendarEventId);
+            }
 
             Event savedEvent = eventRepository.save(event);
             List<User> followers = followRepository.findByFollowee_Id(user.getId())
@@ -222,6 +231,12 @@ public class EventController {
         if (!participants.contains(creator)) {
             participants.add(creator);
         }
+
+        joinEvents.forEach(join -> 
+            calendarService.deleteIfConnected(join.getUser(), join.getGoogleCalendarEventId())
+        );
+
+        calendarService.deleteIfConnected(event.getUser(), event.getCreatorCalendarEventId());
 
         joinedEventRepository.deleteAll(joinEvents);
         eventRepository.deleteById(id);
