@@ -17,14 +17,12 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final JoinedEventRepository joinedEventRepository;
 	private final EventRepository eventRepository;
-	private final CommentRepository commentRepository;
 
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JoinedEventRepository joinedEventRepository, EventRepository eventRepository, CommentRepository commentRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.joinedEventRepository = joinedEventRepository;
 		this.eventRepository = eventRepository;
-		this.commentRepository = commentRepository;
 	}
 
 	// public User signup(User user, String role) throws Exception {
@@ -47,7 +45,6 @@ public class UserService {
 	public void deleteUserByUsername(String username) {
 		userRepository.findByUsername(username).ifPresent(user -> {
 			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));
-			commentRepository.deleteAll(commentRepository.findByUser_Username(username));
 			eventRepository.deleteAll(eventRepository.findByUser_Username(username));
 			userRepository.delete(user);
 		});
