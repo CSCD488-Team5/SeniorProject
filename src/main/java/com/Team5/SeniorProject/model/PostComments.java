@@ -2,6 +2,7 @@ package com.Team5.SeniorProject.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
@@ -27,6 +28,7 @@ public class PostComments {
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
+    @JsonBackReference
     private Event event;
 
     @ManyToOne

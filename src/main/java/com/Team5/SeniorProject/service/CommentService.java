@@ -21,11 +21,13 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
-    public CommentService(CommentRepository commentRepository, EventRepository eventRepository, UserRepository userRepository){
+    public CommentService(CommentRepository commentRepository, EventRepository eventRepository, UserRepository userRepository, EmailService emailService){
         this.commentRepository = commentRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository; 
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -55,6 +57,32 @@ public class CommentService {
         } else {
             throw new RuntimeException("Only author or admin can delete the comment!");
         }
+    }
+
+    @Transactional
+    public void deleteCommentByAdmin(Long commentId, String username, String reason){
+        PostComments comment = getPostComment(commentId);
+        User user = getUser(username);
+        
+        // Check if user is admin
+        if (user.getRole() != Role.ADMIN) {
+            throw new RuntimeException("Only administrators can delete comments with reason!");
+        }
+
+        // Get the event owner
+        User eventOwner = comment.getEvent().getUser();
+
+        // Send email notification
+        emailService.sendCommentDeletionEmail(
+            eventOwner,
+            comment.getEvent().getTitle(),
+            comment.getComment(),
+            reason,
+            user.getUsername()
+        );
+
+        // Delete the comment
+        commentRepository.delete(comment);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------

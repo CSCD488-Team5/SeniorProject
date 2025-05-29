@@ -75,7 +75,7 @@
     </div>
 
     <v-snackbar
-      v-model="snackbar"
+      v-model="showSnackbar"
       :color="snackbarColor"
       :timeout="3000"
       location="top"
@@ -141,6 +141,10 @@ async function submitComment() {
   })
   newComment.value = ''
   await fetchComments()
+
+  snackbarMessage.value = 'Comment posted successfully'
+  snackbarColor.value = 'success'
+  showSnackbar.value = true
 }
 
 //Delete a comment
