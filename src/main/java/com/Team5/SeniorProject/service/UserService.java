@@ -18,7 +18,7 @@ public class UserService {
 	private final JoinedEventRepository joinedEventRepository;
 	private final EventRepository eventRepository;
 
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JoinedEventRepository joinedEventRepository, EventRepository eventRepository, CommentRepository commentRepository) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JoinedEventRepository joinedEventRepository, EventRepository eventRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.joinedEventRepository = joinedEventRepository;
@@ -44,7 +44,7 @@ public class UserService {
 	
 	public void deleteUserByUsername(String username) {
 		userRepository.findByUsername(username).ifPresent(user -> {
-			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));
+			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));b
 			eventRepository.deleteAll(eventRepository.findByUser_Username(username));
 			userRepository.delete(user);
 		});
