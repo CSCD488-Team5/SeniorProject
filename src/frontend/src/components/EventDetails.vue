@@ -55,6 +55,32 @@
       </v-card>
 
       <!-- Comments Section -->
+      <v-card class="pa-4 mt-6">
+        <h2 class="text-h6 mb-4">Comments</h2>
+        <v-list>
+          
+          <v-list-item v-for="comment in comments" :key="comment.id" class="d-flex justify-space-between align-center">
+
+              <v-list-item-title class="font-weight-bold">
+                {{ comment.comment }}
+              </v-list-item-title>
+              <!-- Display username below comment -->
+              <v-list-item-subtitle class="subtitle-2 font-weight-medium">
+                Post by: {{ comment.user.username }}, {{ formatCommentDate(comment.timeStamp) }}
+              </v-list-item-subtitle>
+
+              <v-list-item-action v-if="currentUser && comment.user.username == currentUser || isAdmin">
+                <v-btn 
+                  icon 
+                  small 
+                  text 
+                  class="pa-1" 
+                  @click="deleteComment(comment.id)"
+                  :loading="deletingCommentId === comment.id"
+                  :disabled="deletingCommentId === comment.id"
+                >
+                  <v-icon>mdi-delete</v-icon>
+
       <v-card class="mt-6" elevation="4" rounded="lg">
         <v-card-title class="text-h6 pa-4 pb-2">
           Comments
@@ -90,6 +116,7 @@
                   @click="deleteComment(comment.id)"
                 >
                   <v-icon size="small">mdi-delete</v-icon>
+
                 </v-btn>
               </div>
             </div>
@@ -126,6 +153,15 @@
     <div v-else>
       <p>Loading event details...</p>
     </div>
+
+    <v-snackbar
+      v-model="showSnackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+      location="top"
+    >
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -133,7 +169,7 @@
 import { ref, onMounted, computed, getCurrentInstance } from 'vue'
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
-import {getUsernameFromToken} from "@/utils/jwt.js";
+import {getUsernameFromToken, isAdminFromToken} from "@/utils/jwt.js";
 
 const route = useRoute()
 const eventId = route.params.id
@@ -145,6 +181,13 @@ const comments = computed(() => eventData.value?.comments || [])
 const newComment = ref('')
 //grabs the current user
 const currentUser = ref(null);
+const isAdmin = ref(isAdminFromToken());
+// Loading state for comment deletion
+const deletingCommentId = ref(null);
+// Snackbar state
+const showSnackbar = ref(false);
+const snackbarMessage = ref('');
+const snackbarColor = ref('success');
 
 const { appContext } = getCurrentInstance()
 const axios = appContext.config.globalProperties.$http
@@ -158,6 +201,7 @@ async function fetchEvent() {
 async function fetchCurrentUser(){
     const username = getUsernameFromToken();
     currentUser.value = username;
+    isAdmin.value = isAdminFromToken();
 }
 
 // Submit a new comment
@@ -169,6 +213,31 @@ async function submitComment() {
     timeStamp: now
   })
   newComment.value = ''
+
+  await fetchComments()
+
+  snackbarMessage.value = 'Comment posted successfully'
+  snackbarColor.value = 'success'
+  showSnackbar.value = true
+}
+
+//Delete a comment
+async function deleteComment(commentId) {
+  deletingCommentId.value = commentId;
+  try {
+    await axios.delete(`/api/comments/${commentId}/deleteComment`)
+    await fetchComments(); 
+    snackbarMessage.value = 'Comment deleted successfully'
+    snackbarColor.value = 'success'
+    showSnackbar.value = true
+  } catch (error) {
+    snackbarMessage.value = error.response?.data || 'Failed to delete comment'
+    snackbarColor.value = 'error'
+    showSnackbar.value = true
+  } finally {
+    deletingCommentId.value = null
+  }
+
   await fetchEvent() // Refresh the event data to get the new comment
 }
 
@@ -176,6 +245,7 @@ async function submitComment() {
 async function deleteComment(commentid) {
   await axios.delete(`/api/comments/${commentid}/deleteComment`)
   await fetchEvent() // Refresh the event data to update comments
+
 }
 
 // Format comment timestamp
@@ -216,6 +286,9 @@ onMounted(async () => {
 .font-weight-bold {
   font-weight: bold;
 }
+
+</style>
+
 
 .event-image {
   border-radius: 8px 8px 0 0;

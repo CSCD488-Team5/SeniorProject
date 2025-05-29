@@ -13,7 +13,15 @@ import com.Team5.SeniorProject.model.User;
 public class EmailService {
 
     @Autowired
-    private JavaMailSender mailSender;
+    private JavaMailSender emailSender;
+
+    private void sendEmail(String to, String subject, String content) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(content);
+        emailSender.send(message);
+    }
 
     public void sendEventDeletionEmail(List<User> users, String eventTitle) {
         String subject = "Event Deleted Notification - CampusHive";
@@ -27,7 +35,7 @@ public class EmailService {
             email.setTo(user.getEmail());
             email.setSubject(subject);
             email.setText(message);
-            mailSender.send(email);
+            emailSender.send(email);
         }
     }
 
@@ -44,7 +52,7 @@ public class EmailService {
             email.setTo(user.getEmail());
             email.setSubject(subject);
             email.setText(message);
-            mailSender.send(email);
+            emailSender.send(email);
         }
     }
 
@@ -60,8 +68,56 @@ public class EmailService {
             email.setTo(follower.getEmail());
             email.setSubject(subject);
             email.setText(message);
-            mailSender.send(email);
+            emailSender.send(email);
         }
+    }
+
+    public void sendCommentDeletionEmail(User recipient, String eventTitle, String commentContent, String reason, String adminUsername) {
+        String subject = "Your comment has been deleted by a moderator";
+        
+        String content = String.format("""
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+                    .content { background-color: #ffffff; padding: 20px; border: 1px solid #dee2e6; border-radius: 5px; }
+                    .reason { background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>Comment Deleted by Moderator</h2>
+                </div>
+                
+                <div class="content">
+                    <p>Dear %s,</p>
+                    
+                    <p>A comment you made on the event "%s" has been deleted by moderator %s.</p>
+                    
+                    <div class="reason">
+                        <strong>Reason for deletion:</strong>
+                        <p>%s</p>
+                    </div>
+                    
+                    <p>The deleted comment content was:</p>
+                    <blockquote>%s</blockquote>
+                    
+                    <p>If you believe this action was taken in error, please contact our support team.</p>
+                    
+                    <p>Best regards,<br>The Eastern Classes Team</p>
+                </div>
+            </body>
+            </html>
+            """, 
+            recipient.getUsername(),
+            eventTitle,
+            adminUsername,
+            reason,
+            commentContent
+        );
+
+        sendEmail(recipient.getEmail(), subject, content);
     }
 
 }

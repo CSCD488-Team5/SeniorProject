@@ -37,9 +37,23 @@
 				color="red-darken-4"
 				text
 				variant="tonal"
+				:loading="isDeleting"
+				:disabled="isDeleting"
 				@click="showDeleteDialog = true"
 				>
-					Delete
+					<template v-if="isDeleting">
+						<v-progress-circular
+							indeterminate
+							size="20"
+							width="2"
+							color="white"
+							class="mr-2"
+						></v-progress-circular>
+						Deleting...
+					</template>
+					<template v-else>
+						Delete
+					</template>
 				</v-btn>
 
 			<v-spacer></v-spacer>
@@ -58,13 +72,34 @@
 						label="Reason for deletion"
 						auto-grow
 						rows="3"
+						:rules="[reasonRule]"
 						required
+						:error-messages="reasonError"
 					/>
 				</v-card-text>
 				<v-card-actions>
 					<v-spacer/>
-					<v-btn text @click="showDeleteDialog = false" variant="tonal">Cancel</v-btn>
-					<v-btn color="red-darken-3" @click="submitDelete" variant="tonal">Confirm Delete</v-btn>
+					<v-btn text @click="showDeleteDialog = false" variant="tonal" :disabled="isDeleting">Cancel</v-btn>
+					<v-btn 
+						color="red-darken-3" 
+						@click="submitDelete" 
+						variant="tonal"
+						:loading="isDeleting"
+						:disabled="isDeleting">
+						<template v-if="isDeleting">
+							<v-progress-circular
+								indeterminate
+								size="20"
+								width="2"
+								color="white"
+								class="mr-2"
+							></v-progress-circular>
+							Deleting...
+						</template>
+						<template v-else>
+							Confirm Delete
+						</template>
+					</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -85,7 +120,7 @@
 	<v-snackbar
 		v-model="snackbar"
 		:timeout="5000"
-		color="snackbarColor"
+		:color="snackbarColor"
 		location="top"
 	>
 		{{ snackbarMessage }}
@@ -164,9 +199,16 @@ async function joinEvent() {
 		})
 		joined.value = true
 		emit('update:joined', { id: props.id, joined: true})
+		
+		// Show success notification
+		snackbarMessage.value = 'Successfully joined the event!'
+		snackbarColor.value = 'success'
+		snackbar.value = true
 	} catch (error) {
 		console.error('Join event error:', error.response);
-		alert(error.response?.data || 'Failed to join the event')
+		snackbarMessage.value = error.response?.data || 'Failed to join the event'
+		snackbarColor.value = 'error'
+		snackbar.value = true
 	}
 }
 
@@ -182,10 +224,17 @@ async function unjoinEvent() {
       params: { username }
     })
     joined.value = false
-	emit('update:joined', { id: props.id, joined: false})
+    emit('update:joined', { id: props.id, joined: false})
+    
+    // Show success notification
+    snackbarMessage.value = 'Successfully unjoined the event'
+    snackbarColor.value = 'success'
+    snackbar.value = true
   } catch (error) {
     console.error('Unjoin event error:', error.response)
-    alert(error.response?.data || 'Failed to unjoin the event')
+    snackbarMessage.value = error.response?.data || 'Failed to unjoin the event'
+    snackbarColor.value = 'error'
+    snackbar.value = true
   }
 }
 
@@ -210,19 +259,27 @@ const emit = defineEmits(['update:joined', 'event-deleted'])
 // Deletion logic for ADMIN
 const showDeleteDialog = ref(false)
 const deletionReason = ref('')
+const isDeleting = ref(false)
+const reasonError = ref('')
 
 const snackbar = ref(false)
-const snacbarMessage = ref('')
+const snackbarMessage = ref('')
 const snackbarColor = ref('')
 
+const reasonRule = (v) => {
+  if (!v) return 'Reason for deletion is required'
+  return true
+}
+
 async function submitDelete() {
-	if (!deletionReason.value.trim()) {
-		snackbarMessage.value = "Please provide a reason."
-		snackbarColor.value = "red"
-		snackbar.value = true
+	reasonError.value = ''
+	const validation = reasonRule(deletionReason.value)
+	if (validation !== true) {
+		reasonError.value = validation
 		return
 	}
 
+	isDeleting.value = true
 	try {
 		await axios.delete(`/api/events/delete-event-admin/${props.id}`, {
 			data: { reason: deletionReason.value } 
@@ -232,13 +289,15 @@ async function submitDelete() {
 		deletionReason.value = ''
 
 		snackbarMessage.value = 'Event deleted successfully.'
-		snackbarColor.value = "green"
+		snackbarColor.value = "success"
 		snackbar.value = true
 	} catch (err) {
 		console.error('Delete failed:', err)
 		snackbarMessage.value = "Failed to delete event."
-		snackbarColor.value = "red"
+		snackbarColor.value = "error"
 		snackbar.value = true
+	} finally {
+		isDeleting.value = false
 	}
 }
 </script>

@@ -1,23 +1,29 @@
 package com.Team5.SeniorProject.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import java.security.Principal;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.Team5.SeniorProject.service.CommentService;
 import com.Team5.SeniorProject.model.PostComments;
 
+import com.Team5.SeniorProject.service.CommentService;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 
 
 @RestController
@@ -27,7 +33,6 @@ public class CommentController {
 
     @Autowired
     private CommentService commentService;
-
 
     //Get the comments for the post
     @GetMapping("/{eventId}")
@@ -53,5 +58,24 @@ public class CommentController {
         commentService.deleteComment(userName, commentId);
         return ResponseEntity.ok().build();
     }
-    
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{commentId}/admin-delete")
+    public ResponseEntity<?> deleteCommentByAdmin(
+            @PathVariable Long commentId,
+            @RequestBody Map<String, String> body,
+            @RequestParam String username) {
+        
+        String reason = body.get("reason");
+        if (reason == null || reason.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Deletion reason is required.");
+        }
+
+        try {
+            commentService.deleteCommentByAdmin(commentId, username, reason);
+            return ResponseEntity.ok("Comment deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

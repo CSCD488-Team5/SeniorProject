@@ -1,18 +1,19 @@
 package com.Team5.SeniorProject.service;
 
-import com.Team5.SeniorProject.repository.CommentRepository;
-import com.Team5.SeniorProject.repository.EventRepository;
-import com.Team5.SeniorProject.repository.UserRepository;
-import com.Team5.SeniorProject.model.PostComments;
-import com.Team5.SeniorProject.model.User;
-import com.Team5.SeniorProject.model.Event;
-
-import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.time.LocalDateTime;
+import com.Team5.SeniorProject.model.Event;
+import com.Team5.SeniorProject.model.PostComments;
+import com.Team5.SeniorProject.model.Role;
+import com.Team5.SeniorProject.model.User;
+import com.Team5.SeniorProject.repository.CommentRepository;
+import com.Team5.SeniorProject.repository.EventRepository;
+import com.Team5.SeniorProject.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class CommentService {
@@ -20,11 +21,13 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
-    public CommentService(CommentRepository commentRepository, EventRepository eventRepository, UserRepository userRepository){
+    public CommentService(CommentRepository commentRepository, EventRepository eventRepository, UserRepository userRepository, EmailService emailService){
         this.commentRepository = commentRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository; 
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -48,12 +51,38 @@ public class CommentService {
         PostComments comment = getPostComment(commentId);
         User user = getUser(username);
 
-        //Check to see if the the owner is deleting the comment
-        if (comment.getUser() == user){
+        // Allow deletion if user is the author or an admin
+        if (comment.getUser().equals(user) || user.getRole() == Role.ADMIN){
             commentRepository.delete(comment);
-        }else {
-            throw new  RuntimeException("Only author can delete the comment!");
+        } else {
+            throw new RuntimeException("Only author or admin can delete the comment!");
         }
+    }
+
+    @Transactional
+    public void deleteCommentByAdmin(Long commentId, String username, String reason){
+        PostComments comment = getPostComment(commentId);
+        User user = getUser(username);
+        
+        // Check if user is admin
+        if (user.getRole() != Role.ADMIN) {
+            throw new RuntimeException("Only administrators can delete comments with reason!");
+        }
+
+        // Get the event owner
+        User eventOwner = comment.getEvent().getUser();
+
+        // Send email notification
+        emailService.sendCommentDeletionEmail(
+            eventOwner,
+            comment.getEvent().getTitle(),
+            comment.getComment(),
+            reason,
+            user.getUsername()
+        );
+
+        // Delete the comment
+        commentRepository.delete(comment);
     }
 
     //-----------------------------------------------------------------------------------------------------------------------------
