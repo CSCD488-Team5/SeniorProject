@@ -1,11 +1,13 @@
 package com.Team5.SeniorProject.model;
 
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.Team5.SeniorProject.service.UserService;
 
+@Profile("!heroku")
 @Component
 @Order(1)
 public class UserInitializer implements CommandLineRunner {
