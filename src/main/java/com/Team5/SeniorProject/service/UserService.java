@@ -44,7 +44,7 @@ public class UserService {
 	
 	public void deleteUserByUsername(String username) {
 		userRepository.findByUsername(username).ifPresent(user -> {
-			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));b
+			joinedEventRepository.deleteAll(joinedEventRepository.findByUser_Username(username));
 			eventRepository.deleteAll(eventRepository.findByUser_Username(username));
 			userRepository.delete(user);
 		});
