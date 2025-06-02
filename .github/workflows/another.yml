@@ -30,10 +30,10 @@ jobs:
 
       - name: Zip file from root
         run: |
-          zip -r source-root-${{ github.run_id }}.zip . -x ".git/*"
+          zip -r source-${{ github.run_id }}.zip . -x ".git/*"
 
       - name: Upload build artifact 
         uses: actions/upload-artifact@v4
         with:
           name: source-from-root
-          path: source-root-${{ github.run_id }}.zip
+          path: source-${{ github.run_id }}.zip
