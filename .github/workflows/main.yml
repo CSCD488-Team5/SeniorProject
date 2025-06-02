@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Buiding release 
+name: Java Build with Maven - Create Release 
 
 on:
   push:
@@ -20,20 +20,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21.0.7'
           distribution: 'temurin'
           cache: maven
+          
+      - name: Build Server
+        run: mvn -B package --file pom.xml
 
-      - name: Zip file from root
-        run: |
-          zip -r source-${{ github.run_id }}.zip . -x ".git/*"
-
-      - name: Upload build artifact 
-        uses: actions/upload-artifact@v4
+      - name: Create Github release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: source-from-root
-          path: source-${{ github.run_id }}.zip
+          tag_name: ${{ github.run_number }}
+          release_name: v0.0.${{ github.run_number }}
