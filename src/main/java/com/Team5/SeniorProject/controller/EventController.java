@@ -188,7 +188,13 @@ public class EventController {
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 // Step 1: Save image to /static/images/events/
-                String filename = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+                String originalFilename = imageFile.getOriginalFilename();
+                if (originalFilename == null) {
+                    originalFilename = "default_image.png"; // Fallback if filename is null
+                }
+                String safeFilename = originalFilename.replaceAll("[^a-zA-Z0-9\\.\\-]", "_"); // Sanitize filename
+
+                String filename = System.currentTimeMillis() + "_" + safeFilename;
 
                 Path filePath = Paths.get(uploadDir, filename);
                 Files.createDirectories(filePath.getParent());
