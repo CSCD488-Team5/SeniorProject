@@ -4,6 +4,9 @@ import router from './router/index.js'
 import axios from "axios";
 import  { isTokenValid } from "./utils/jwt.js";
 
+// Set Axios base URL from environment variable
+axios.defaults.baseURL = import.meta.env.VITE_API_URL
+
 // Axios interceptor
 axios.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
