@@ -41,7 +41,7 @@ const login = async () => {
   }
 
   try {
-    const response = await axios.post('http://localhost/api/auth/login', {
+    const response = await axios.post('/api/auth/login', {
       username: username.value,
       password: password.value
     });
