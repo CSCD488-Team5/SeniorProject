@@ -2,12 +2,7 @@ package com.Team5.SeniorProject.controller;
 
 
 import java.util.List;
-
-import com.Team5.SeniorProject.jwt.JwtUtils;
-import com.Team5.SeniorProject.jwt.LoginRequest;
-import com.Team5.SeniorProject.model.Role;
-import com.Team5.SeniorProject.model.User;
-import com.Team5.SeniorProject.repository.UserRepository;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,18 +22,10 @@ import com.Team5.SeniorProject.jwt.JwtUtils;
 import com.Team5.SeniorProject.jwt.LoginRequest;
 import com.Team5.SeniorProject.model.User;
 import com.Team5.SeniorProject.repository.UserRepository;
-
-import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
-
 import com.Team5.SeniorProject.service.UserService;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth") // Changed to match SecurityConfig
-@CrossOrigin(origins = "http://localhost:5173")
 public class SignupController {
 
     private final UserService userService;
