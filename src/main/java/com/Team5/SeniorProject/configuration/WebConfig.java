@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addMapping("/**") // allow all endpoints
 				.allowedOrigins(
 					"http://localhost:5173", 
-								"https://campus-hive-51d7405b52bc.herokuapp.com/")
+								"fascinating-hamster-cb5840.netlify.app")
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 				.allowedHeaders("*")
 				.allowCredentials(true);
