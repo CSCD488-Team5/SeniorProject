@@ -9,10 +9,12 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		// Allow CORS for static images
-		registry.addMapping("/images/**")
-			.allowedOrigins("http://localhost:5173")
-			.allowedMethods("GET")
-			.allowedHeaders("*")
-			.allowCredentials(true);
+		registry.addMapping("/**") // allow all endpoints
+				.allowedOrigins(
+					"http://localhost:5173", 
+								"https://campus-hive-51d7405b52bc.herokuapp.com/")
+				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+				.allowedHeaders("*")
+				.allowCredentials(true);
 	}
 }
