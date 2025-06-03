@@ -60,6 +60,7 @@ public class SecurityConfig {
                     }}
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll() // Allow signup and login
                         .requestMatchers("/api/events/upload").permitAll()
