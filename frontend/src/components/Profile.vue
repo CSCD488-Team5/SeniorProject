@@ -16,6 +16,7 @@ const user = ref({
 })
 
 const events = ref([])
+const followersCounter = ref(0)
 
 const profileImageUrl = ref('https://cdn-icons-png.flaticon.com/512/149/149071.png') // placeholder avatar
 
@@ -30,6 +31,9 @@ onMounted(async () => {
 
 		const eventRes = await axios.get(`http://localhost/api/events/user/${profileUsername.value}`)
 		events.value = eventRes.data
+
+		const followersRes = await axios.get(`api/users/${profileUsername.value}/follow-count`)
+		followersCounter.value = followersRes.data;
 	} catch (err) {
 		console.error("Error loading profile:", err)
 	}
@@ -55,6 +59,7 @@ const currentUsername = getUsernameFromToken()
 			<v-card-text>
 				<p><strong>Joined:</strong> {{ user.createdAt }}</p>
 				<p><strong>Total Events:</strong> {{ events.length }}</p>
+				<p><strong>Followers:</strong> {{ followersCounter }}</p>
 			</v-card-text>
 
 			<v-card-actions>

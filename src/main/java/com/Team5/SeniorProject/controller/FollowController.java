@@ -56,4 +56,14 @@ public class FollowController {
 	public List<User> getFollowing(@PathVariable Long id) {
 		return followService.listFollowing(id);
 	}
+
+	@GetMapping("/{username}/follow-count")
+	public ResponseEntity<Long> getFollowCount(@PathVariable String username) {
+		if (!userRepository.findByUsername(username).isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		long count = followService.getFollowCount(username);
+		return ResponseEntity.ok(count);
+	}
 }
