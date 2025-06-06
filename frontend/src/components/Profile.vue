@@ -12,7 +12,6 @@ const profileUsername = ref(route.params.username)
 const user = ref({
 	username: '',
 	email: '',
-	createdAt: '',
 })
 
 const events = ref([])
@@ -57,7 +56,6 @@ const currentUsername = getUsernameFromToken()
 			</v-card-title>
 
 			<v-card-text>
-				<p><strong>Joined:</strong> {{ user.createdAt }}</p>
 				<p><strong>Total Events:</strong> {{ events.length }}</p>
 				<p><strong>Followers:</strong> {{ followersCounter }}</p>
 			</v-card-text>
