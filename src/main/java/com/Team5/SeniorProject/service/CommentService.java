@@ -60,25 +60,16 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteCommentByAdmin(Long commentId, String username, String reason){
+    public void deleteCommentByAdmin(Long commentId, String reason){
         PostComments comment = getPostComment(commentId);
-        User user = getUser(username);
-        
-        // Check if user is admin
-        if (user.getRole() != Role.ADMIN) {
-            throw new RuntimeException("Only administrators can delete comments with reason!");
-        }
-
-        // Get the event owner
-        User eventOwner = comment.getEvent().getUser();
+        User user = comment.getUser();
 
         // Send email notification
         emailService.sendCommentDeletionEmail(
-            eventOwner,
+            user,
             comment.getEvent().getTitle(),
             comment.getComment(),
-            reason,
-            user.getUsername()
+            reason
         );
 
         // Delete the comment

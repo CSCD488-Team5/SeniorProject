@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Team5.SeniorProject.model.PostComments;
@@ -54,11 +53,10 @@ public class CommentController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{commentId}/admin-delete")
+    @PostMapping("/{commentId}/admin-delete")
     public ResponseEntity<?> deleteCommentByAdmin(
             @PathVariable Long commentId,
-            @RequestBody Map<String, String> body,
-            @RequestParam String username) {
+            @RequestBody Map<String, String> body) {
         
         String reason = body.get("reason");
         if (reason == null || reason.trim().isEmpty()) {
@@ -66,7 +64,7 @@ public class CommentController {
         }
 
         try {
-            commentService.deleteCommentByAdmin(commentId, username, reason);
+            commentService.deleteCommentByAdmin(commentId, reason);
             return ResponseEntity.ok("Comment deleted successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
