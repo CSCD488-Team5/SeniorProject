@@ -81,13 +81,13 @@
                   <p class="comment-text mt-1 mb-0">{{ comment.comment }}</p>
                 </div>
                 <v-btn
-                  v-if="currentUser && comment.user && comment.user.username === currentUser"
+                  v-if="currentUser && comment.user && comment.user.username === currentUser || isAdmin"
                   icon
                   variant="text"
                   size="small"
                   color="error"
                   class="ml-2"
-                  @click="deleteComment(comment.id)"
+                  @click="isAdmin ? openDeleteDialog(comment.id) : deleteComment(comment.id)"
                 >
                   <v-icon size="small">mdi-delete</v-icon>
                 </v-btn>
@@ -135,6 +135,27 @@
     >
       {{ snackbarMessage }}
     </v-snackbar>
+
+    <v-dialog v-model="confirmDialog" max-width="500">
+      <v-card>
+        <v-card-title>Delete Comment</v-card-title>
+        <v-card-text>
+          <v-textarea
+            v-model="deleteReason"
+            label="Reason for deleting this comment"
+            rows="3"
+            auto-grow
+            outlined
+            required>
+          </v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="confirmDialog = false">Cancel</v-btn>
+          <v-btn color="error" @click="confirmDelete">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -164,6 +185,46 @@ const snackbarColor = ref('success');
 
 const { appContext } = getCurrentInstance()
 const axios = appContext.config.globalProperties.$http
+
+const confirmDialog = ref(false);
+const deleteReason = ref('');
+const selectedCommentId = ref(null);
+
+function openDeleteDialog(commentId) {
+  selectedCommentId.value = commentId;
+  deleteReason.value = '';
+  confirmDialog.value = true;
+}
+
+async function confirmDelete() {
+  if (!deleteReason.value.trim()) {
+    snackbarMessage.value = 'Please provide a reason for deletion';
+    snackbarColor.value = 'error';
+    showSnackbar.value = true;
+    return;
+  }
+
+  try {
+    await axios.post(`/api/comments/${selectedCommentId.value}/admin-delete`, {
+      reason: deleteReason.value
+    })
+    await fetchEvent(); // Refresh the event data to update comments
+    confirmDialog.value = false;
+    snackbarMessage.value = 'Comment deleted successfully';
+    snackbarColor.value = 'success';
+    showSnackbar.value = true;
+  } catch (error) {
+    snackbarMessage.value = error.response?.data || 'Failed to delete comment';
+    snackbarColor.value = 'error';
+    showSnackbar.value = true;
+  } finally {
+    selectedCommentId.value = null;
+  }
+  confirmDialog.value = false;
+  deleteReason.value = '';
+  selectedCommentId.value = null;
+}
+
 
 // Fetch event details
 async function fetchEvent() {
@@ -203,6 +264,9 @@ async function submitComment() {
 
 //Delete a comment
 async function deleteComment(commentId) {
+  if (deletingCommentId.value === commentId) return; // Prevent double clicks
+
+
   deletingCommentId.value = commentId;
   try {
     await axios.delete(`/api/comments/${commentId}/deleteComment`)

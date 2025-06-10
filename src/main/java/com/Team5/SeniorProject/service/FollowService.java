@@ -48,4 +48,8 @@ public class FollowService {
 				.map(Follow::getFollowee).toList();
 	}
 
+	public long getFollowCount(String username) {
+		return followRepository.countByFollowee_Username(username);
+	}
+
 }
