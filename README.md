@@ -32,7 +32,6 @@
 | Email | JavaMail Sender | Uses SMTP |
 | CI/CD | GitHub Actions | None |
 
-=======
 | Tool  | Version |
 | ------------- | ------------- |
 | JDK | 21 |
