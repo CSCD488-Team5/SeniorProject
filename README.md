@@ -9,7 +9,7 @@
 | Frontend | Vue 3 (Vite) + Vuetify 3  | Single-Page App (SPA) hosted on Netlify |
 | Backend | Spring Boot 3 (Java 21)  | REST API secured with JWT; deployed on Heroku |
 | Database | PostgreSQL (Heroku) and H2 (local)  | JPA |
-| Storage | Local `/static/images/events/` (directory) | Used to store event images |
+| Storage | Local `SeniorProject/uploads/events` (directory) | Used to store event images |
 | Email | JavaMail Sender | Uses SMTP |
 | CI/CD | GitHub Actions | None |
 
@@ -22,6 +22,7 @@
 
 ## 2. Local Development
 ### 2.1 Prerequisites
+
 | Layer  | Tech | Notes |
 | ------------- | ------------- | ------------- |
 | Frontend | Vue 3 (Vite) + Vuetify 3  | Single-Page App (SPA) hosted on Netlify |
@@ -31,7 +32,33 @@
 | Email | JavaMail Sender | Uses SMTP |
 | CI/CD | GitHub Actions | None |
 
+=======
+| Tool  | Version |
+| ------------- | ------------- |
+| JDK | 21 |
+| Maven | 4.0 |
+| Node | 24 |
+| npm | 11.3 |
+| Git | latest |
 
+
+### 2.2 Clone & Run
+```
+# 1 - backend:
+cd SeniorProject
+mvn spring-boot:run
+
+# 2 - frontend
+cd ../frontend
+npm install
+npm run dev
+```
+
+### 2.3 Environment Variables
+Set your environment varaibles for both front end, back end, and database
+
+
+Happy hacking!  – CampusHive Core Team
 
 
 ## 3. Applications needed for development
