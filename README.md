@@ -1,4 +1,4 @@
-# CampuseHive - Senior Project Handoof Guide
+# CampuseHive - Senior Project Guide
 
 > ### Purpose
 >This README is written for a new development team taking over CampusHive.  It contains everything you need to build, run, and extend the project in local, staging, and production environments.  Where external services are required, placeholders are provided – create your own accounts and supply credentials via environment variables.
